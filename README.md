@@ -73,4 +73,4 @@ npx immersive-scroll validate ./public/immersive/hero
 3. The release workflow opens or updates a version PR.
 4. Merging that PR runs the publish job, rebuilds the workspace, and publishes public packages to npm.
 
-The publish workflow expects an `NPM_TOKEN` repository secret. Details live in [.github/README.md](.github/README.md).
+The release workflow expects an `NPM_TOKEN` repository secret with publish access to `immersive-scroll` and the `@immersive-scroll/*` scope.
