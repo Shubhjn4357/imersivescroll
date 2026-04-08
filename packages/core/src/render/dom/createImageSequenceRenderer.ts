@@ -1,6 +1,13 @@
-import type { ImmersiveRenderer, RenderFrameInput, VisualConfig } from '@immersive-scroll/shared';
+import type {
+  ImmersiveRenderer,
+  RenderFrameInput,
+  VisualConfig
+} from '@immersive-scroll/shared';
 
-export function createImageSequenceRenderer(element: HTMLImageElement, config: VisualConfig): ImmersiveRenderer {
+export function createImageSequenceRenderer(
+  element: HTMLImageElement,
+  config: VisualConfig
+): ImmersiveRenderer {
   return {
     strategy: 'img-sequence',
     mount() {

@@ -1,6 +1,8 @@
 import type { ExtractOptions, ExtractionConfig } from '../types';
 
-export function buildExtractionConfig(options: ExtractOptions): ExtractionConfig {
+export function buildExtractionConfig(
+  options: ExtractOptions
+): ExtractionConfig {
   return {
     fps: options.fps ?? 30,
     format: options.format ?? 'webp',

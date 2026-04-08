@@ -1,7 +1,5 @@
 import type gsapModule from 'gsap';
-import type {
-  ScrollTrigger as ScrollTriggerClass
-} from 'gsap/ScrollTrigger';
+import type { ScrollTrigger as ScrollTriggerClass } from 'gsap/ScrollTrigger';
 
 type GsapInstance = typeof gsapModule;
 type ScrollTriggerStatic = typeof ScrollTriggerClass;

@@ -42,8 +42,14 @@ export interface ImmersivePlugin {
   name: string;
   setup?(context: ImmersivePluginContext): MaybePromise<void>;
   onReady?(context: ImmersivePluginContext): MaybePromise<void>;
-  onScroll?(context: ImmersivePluginContext, state: ScrollState): MaybePromise<void>;
-  onFrameChange?(context: ImmersivePluginContext, frameIndex: number): MaybePromise<void>;
+  onScroll?(
+    context: ImmersivePluginContext,
+    state: ScrollState
+  ): MaybePromise<void>;
+  onFrameChange?(
+    context: ImmersivePluginContext,
+    frameIndex: number
+  ): MaybePromise<void>;
   onResize?(context: ImmersivePluginContext): MaybePromise<void>;
   onDestroy?(context: ImmersivePluginContext): MaybePromise<void>;
 }

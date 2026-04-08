@@ -1,10 +1,12 @@
 # Quick Start: Solid
 
 ```tsx
-import { ImmersiveScroll } from '@immersive-scroll/solid';
+import { ImmersiveScroll } from 'immersive-scroll/solid';
 
 export function Hero() {
-  return <ImmersiveScroll framesPath="/immersive/ocean">Solid story</ImmersiveScroll>;
+  return (
+    <ImmersiveScroll framesPath="/immersive/ocean">Solid story</ImmersiveScroll>
+  );
 }
 ```
 

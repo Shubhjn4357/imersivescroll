@@ -4,7 +4,9 @@ import { listFrameFiles } from '../io/listFrameFiles';
 import { readJson } from '../io/readJson';
 import type { ValidationReport } from '../types';
 
-export async function validateExistingFrames(folderPath: string): Promise<ValidationReport> {
+export async function validateExistingFrames(
+  folderPath: string
+): Promise<ValidationReport> {
   const manifestPath = path.join(folderPath, 'manifest.json');
   const manifestPayload = await readJson<unknown>(manifestPath);
   const validation = validateFrameManifest(manifestPayload);

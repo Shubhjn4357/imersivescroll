@@ -62,7 +62,8 @@ const previewPanels: readonly PreviewPanel[] = [
   },
   {
     eyebrow: 'Visual tuning',
-    title: 'Filters and fit mode should change art direction without changing the asset pipeline.',
+    title:
+      'Filters and fit mode should change art direction without changing the asset pipeline.',
     description:
       'Use the controls below to push contrast, saturation, blur, overlay depth, and object-fit while keeping the same source sequence.',
     align: 'right',
@@ -78,7 +79,8 @@ const previewPanels: readonly PreviewPanel[] = [
   },
   {
     eyebrow: 'Product review',
-    title: 'Use the same preview to QA progress, frame selection, and motion timing.',
+    title:
+      'Use the same preview to QA progress, frame selection, and motion timing.',
     description:
       'Because the scroller is bounded, it becomes easier to tune the feel of a scene without reloading the entire route.',
     align: 'right',
@@ -133,7 +135,10 @@ function drawFrameToCanvas(
   const devicePixelRatio = window.devicePixelRatio || 1;
   const renderWidth = Math.max(1, Math.round(viewportSize.width));
   const renderHeight = Math.max(1, Math.round(viewportSize.height));
-  const nextCanvasWidth = Math.max(1, Math.round(renderWidth * devicePixelRatio));
+  const nextCanvasWidth = Math.max(
+    1,
+    Math.round(renderWidth * devicePixelRatio)
+  );
   const nextCanvasHeight = Math.max(
     1,
     Math.round(renderHeight * devicePixelRatio)
@@ -327,7 +332,11 @@ export function PlaygroundWorkbench() {
 
     setLoadedFrameCount(0);
 
-    for (let frameIndex = 0; frameIndex < manifest.frameCount; frameIndex += 1) {
+    for (
+      let frameIndex = 0;
+      frameIndex < manifest.frameCount;
+      frameIndex += 1
+    ) {
       const image = new Image();
       image.decoding = 'async';
       image.src = resolveFrameUrl(manifest, frameIndex);
@@ -353,7 +362,9 @@ export function PlaygroundWorkbench() {
       return 0;
     }
 
-    return Math.round(clamp(progress, 0, 1) * Math.max(manifest.frameCount - 1, 0));
+    return Math.round(
+      clamp(progress, 0, 1) * Math.max(manifest.frameCount - 1, 0)
+    );
   }, [manifest, progress]);
 
   useEffect(() => {
@@ -446,12 +457,18 @@ export function PlaygroundWorkbench() {
         <div className="playground-preview-shell__header">
           <div>
             <p className="eyebrow">Contained preview</p>
-            <h3>Scroll inside this panel to test the scene without moving the whole route.</h3>
+            <h3>
+              Scroll inside this panel to test the scene without moving the
+              whole route.
+            </h3>
           </div>
           <div className="info-pill-row">
-            <span className="info-pill">Progress {formatPercent(progress)}</span>
             <span className="info-pill">
-              Frame {manifest ? currentFrame + 1 : 0}/{manifest?.frameCount ?? 0}
+              Progress {formatPercent(progress)}
+            </span>
+            <span className="info-pill">
+              Frame {manifest ? currentFrame + 1 : 0}/
+              {manifest?.frameCount ?? 0}
             </span>
             <span className="info-pill">
               Loaded {loadedFrameCount}/{manifest?.frameCount ?? 0}
@@ -459,7 +476,11 @@ export function PlaygroundWorkbench() {
           </div>
         </div>
 
-        <div className="playground-preview-scroll" ref={scrollRef} onScroll={handleScroll}>
+        <div
+          className="playground-preview-scroll"
+          ref={scrollRef}
+          onScroll={handleScroll}
+        >
           <div
             className="playground-preview-stage"
             style={{ minHeight: stageHeight }}
@@ -471,7 +492,10 @@ export function PlaygroundWorkbench() {
                 style={{ opacity: controls.overlayOpacity }}
               />
               {controls.showScrollbar ? (
-                <div className="playground-preview-scrollbar" aria-hidden="true">
+                <div
+                  className="playground-preview-scrollbar"
+                  aria-hidden="true"
+                >
                   <div
                     className="playground-preview-scrollbar__track"
                     style={{ opacity: controls.trackOpacity }}
@@ -519,13 +543,18 @@ export function PlaygroundWorkbench() {
                     <p>{panel.description}</p>
                     <div className="info-pill-row">
                       {panel.details.map((detail) => (
-                        <span className="info-pill" key={`${panel.title}-${detail}`}>
+                        <span
+                          className="info-pill"
+                          key={`${panel.title}-${detail}`}
+                        >
                           {detail}
                         </span>
                       ))}
                     </div>
                     {index === 0 && loadError ? (
-                      <p className="reference-row__default">Manifest error: {loadError}</p>
+                      <p className="reference-row__default">
+                        Manifest error: {loadError}
+                      </p>
                     ) : null}
                   </article>
                 </section>
@@ -539,7 +568,9 @@ export function PlaygroundWorkbench() {
         <div className="playground-control-dock__header">
           <div>
             <p className="eyebrow">Live controls</p>
-            <h3>Tweak the scene props and watch the preview react immediately.</h3>
+            <h3>
+              Tweak the scene props and watch the preview react immediately.
+            </h3>
           </div>
           <button
             className="action-pill"

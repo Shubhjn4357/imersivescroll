@@ -5,7 +5,9 @@ export function useImmersiveContext() {
   const context = useContext(ImmersiveContext);
 
   if (!context) {
-    throw new Error('useImmersiveContext must be used within ImmersiveScrollProvider.');
+    throw new Error(
+      'useImmersiveContext must be used within ImmersiveScrollProvider.'
+    );
   }
 
   return context;

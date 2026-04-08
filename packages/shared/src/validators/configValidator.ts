@@ -3,12 +3,18 @@ import type { ImmersiveConfig, PartialImmersiveConfig } from '../types/config';
 import type { ValidationIssue, ValidationResult } from '../types/utility';
 import { deepMerge } from '../utils/deepMerge';
 
-export function validateConfig(input: PartialImmersiveConfig | undefined): ValidationResult<ImmersiveConfig> {
+export function validateConfig(
+  input: PartialImmersiveConfig | undefined
+): ValidationResult<ImmersiveConfig> {
   const config = deepMerge(DEFAULT_IMMERSIVE_CONFIG, input);
   const issues: ValidationIssue[] = [];
 
   if (config.preloadCount < 0) {
-    issues.push({ code: 'config.preloadCount', message: 'preloadCount must be >= 0', path: 'preloadCount' });
+    issues.push({
+      code: 'config.preloadCount',
+      message: 'preloadCount must be >= 0',
+      path: 'preloadCount'
+    });
   }
 
   if (config.unloadDistance < 0) {
@@ -20,7 +26,11 @@ export function validateConfig(input: PartialImmersiveConfig | undefined): Valid
   }
 
   if (config.quality <= 0 || config.quality > 100) {
-    issues.push({ code: 'config.quality', message: 'quality must be between 1 and 100', path: 'quality' });
+    issues.push({
+      code: 'config.quality',
+      message: 'quality must be between 1 and 100',
+      path: 'quality'
+    });
   }
 
   return {

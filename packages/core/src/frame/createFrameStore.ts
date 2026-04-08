@@ -1,4 +1,9 @@
-import type { FrameStoreState, ImmersiveFrameManifest, Subscriber, Unsubscribe } from '@immersive-scroll/shared';
+import type {
+  FrameStoreState,
+  ImmersiveFrameManifest,
+  Subscriber,
+  Unsubscribe
+} from '@immersive-scroll/shared';
 import { resolveFrameUrl } from './frameManifest';
 
 export interface FrameStore {
@@ -37,7 +42,9 @@ export function createFrameStore(): FrameStore {
         ...state,
         manifest,
         totalFrames: manifest?.frameCount ?? 0,
-        frameUrl: manifest ? resolveFrameUrl(manifest, state.currentFrame) : null,
+        frameUrl: manifest
+          ? resolveFrameUrl(manifest, state.currentFrame)
+          : null,
         ready: Boolean(manifest)
       };
       notify();
@@ -46,7 +53,9 @@ export function createFrameStore(): FrameStore {
       state = {
         ...state,
         currentFrame: frameIndex,
-        frameUrl: state.manifest ? resolveFrameUrl(state.manifest, frameIndex) : null
+        frameUrl: state.manifest
+          ? resolveFrameUrl(state.manifest, frameIndex)
+          : null
       };
       notify();
     },

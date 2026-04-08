@@ -19,6 +19,10 @@
     "skipLibCheck": true,
     "types": ["node"],
     "paths": {
+      "immersive-scroll": ["./packages/immersive-scroll/src/index.ts"],
+      "immersive-scroll/next": ["./packages/immersive-scroll/src/next.ts"],
+      "immersive-scroll/solid": ["./packages/immersive-scroll/src/solid.ts"],
+      "immersive-scroll/web": ["./packages/immersive-scroll/src/web.ts"],
       "@immersive-scroll/shared": ["./packages/shared/src/index.ts"],
       "@immersive-scroll/core": ["./packages/core/src/index.ts"],
       "@immersive-scroll/react": ["./packages/react/src/index.ts"],

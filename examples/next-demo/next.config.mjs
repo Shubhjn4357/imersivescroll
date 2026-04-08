@@ -4,6 +4,7 @@ const nextConfig = {
     externalDir: true
   },
   transpilePackages: [
+    'immersive-scroll',
     '@immersive-scroll/next',
     '@immersive-scroll/react',
     '@immersive-scroll/core',

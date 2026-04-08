@@ -1,4 +1,7 @@
-import type { ImmersiveConfig, ImmersiveRenderer } from '@immersive-scroll/shared';
+import type {
+  ImmersiveConfig,
+  ImmersiveRenderer
+} from '@immersive-scroll/shared';
 import { createCanvasRenderer } from '../canvas/createCanvasRenderer';
 import { createImageSequenceRenderer } from '../dom/createImageSequenceRenderer';
 
@@ -7,8 +10,15 @@ export interface RendererTargets {
   image?: HTMLImageElement | null;
 }
 
-export function createRenderer(config: ImmersiveConfig, targets: RendererTargets): ImmersiveRenderer | null {
-  if ((config.renderStrategy === 'canvas' || config.renderStrategy === 'hybrid') && targets.canvas) {
+export function createRenderer(
+  config: ImmersiveConfig,
+  targets: RendererTargets
+): ImmersiveRenderer | null {
+  if (
+    (config.renderStrategy === 'canvas' ||
+      config.renderStrategy === 'hybrid') &&
+    targets.canvas
+  ) {
     return createCanvasRenderer(targets.canvas, config.visual);
   }
 

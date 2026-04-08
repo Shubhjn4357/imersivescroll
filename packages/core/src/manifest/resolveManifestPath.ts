@@ -5,5 +5,7 @@ export function resolveManifestPath(config: ImmersiveConfig): string | null {
     return config.manifestPath;
   }
 
-  return config.framesPath ? `${config.framesPath.replace(/\/$/, '')}/manifest.json` : null;
+  return config.framesPath
+    ? `${config.framesPath.replace(/\/$/, '')}/manifest.json`
+    : null;
 }

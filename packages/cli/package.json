@@ -1,8 +1,17 @@
 {
-  "name": "immersive-scroll",
+  "name": "@immersive-scroll/cli",
   "version": "0.1.0",
+  "private": true,
   "description": "CLI for immersive scroll frame extraction and validation.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shubhjn4357/imersivescroll.git"
+  },
+  "homepage": "https://github.com/Shubhjn4357/imersivescroll#readme",
+  "bugs": {
+    "url": "https://github.com/Shubhjn4357/imersivescroll/issues"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -10,7 +19,10 @@
   "bin": {
     "immersive-scroll": "./bin/immersive-scroll.js"
   },
-  "files": ["dist", "bin"],
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
     "build": "tsup",
     "clean": "rimraf dist",

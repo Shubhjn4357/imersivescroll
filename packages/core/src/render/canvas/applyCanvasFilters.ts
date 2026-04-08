@@ -1,6 +1,4 @@
-import type {
-  VisualConfig
-} from '@immersive-scroll/shared';
+import type { VisualConfig } from '@immersive-scroll/shared';
 
 export function applyCanvasFilters(
   context: CanvasRenderingContext2D,

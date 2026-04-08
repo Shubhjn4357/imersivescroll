@@ -6,7 +6,9 @@ import { validateExistingFrames } from '../../../packages/cli/src/core/validateE
 
 describe('validateExistingFrames', () => {
   it('reports a valid directory when all frames exist', async () => {
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), 'immersive-validate-'));
+    const tempDir = await mkdtemp(
+      path.join(os.tmpdir(), 'immersive-validate-')
+    );
     await mkdir(tempDir, { recursive: true });
     await writeFile(
       path.join(tempDir, 'manifest.json'),

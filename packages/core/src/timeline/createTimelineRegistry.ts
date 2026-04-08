@@ -14,7 +14,10 @@ export function createTimelineRegistry() {
       return registry.get(id) as TValue | undefined;
     },
     getAll(): TimelineEntry[] {
-      return Array.from(registry.entries()).map(([id, value]) => ({ id, value }));
+      return Array.from(registry.entries()).map(([id, value]) => ({
+        id,
+        value
+      }));
     }
   };
 }

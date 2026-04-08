@@ -1,4 +1,4 @@
-import { ImmersiveFloating, ImmersiveScroll } from '@immersive-scroll/solid';
+import { ImmersiveFloating, ImmersiveScroll } from 'immersive-scroll/solid';
 import {
   landingDocsCards,
   landingFeatureCards,

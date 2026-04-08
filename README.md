@@ -1,16 +1,17 @@
 # immersive-scroll-video
 
-A pnpm monorepo for immersive scroll storytelling, frame-sequence tooling, and cross-framework adapters. The repository keeps shared contracts, the core engine, UI adapters, examples, and release automation in separate directories so the system can scale without folding everything into one package.
+A pnpm monorepo for immersive scroll storytelling, frame-sequence tooling, and cross-framework adapters. The public npm surface is a single package, `immersive-scroll`, while the underlying engine and adapter layers stay internal to the workspace.
 
 ## Workspace packages
 
-- `@immersive-scroll/shared`: shared types, config contracts, validators, and small utilities.
-- `@immersive-scroll/core`: framework-agnostic engine, renderer lifecycle, stores, progress control, and plugin orchestration.
-- `@immersive-scroll/react`: provider, hooks, components, and packaged scrollbar/debug UI for React.
-- `@immersive-scroll/next`: client-only wrappers for using the React adapter inside Next.js.
-- `@immersive-scroll/solid`: Solid primitives for immersive scenes.
-- `@immersive-scroll/web`: imperative DOM API and custom-element registration.
-- `immersive-scroll`: CLI for extracting frames, hashing sources, generating manifests, validating folders, and running environment diagnostics.
+- `immersive-scroll`: public package with React exports at the root and `next`, `solid`, and `web` subpath entry points.
+- `@immersive-scroll/shared`: internal shared types, config contracts, validators, and small utilities.
+- `@immersive-scroll/core`: internal framework-agnostic engine, renderer lifecycle, stores, progress control, and plugin orchestration.
+- `@immersive-scroll/react`: internal React adapter layer used by the public package.
+- `@immersive-scroll/next`: internal Next.js client wrapper layer used by the public package.
+- `@immersive-scroll/solid`: internal Solid adapter layer used by the public package.
+- `@immersive-scroll/web`: internal imperative DOM adapter used by the public package.
+- `@immersive-scroll/cli`: internal frame extraction, hashing, manifest, repair, validation, and diagnostics tooling.
 
 More detail for each package lives in [packages/README.md](packages/README.md).
 
@@ -44,7 +45,7 @@ pnpm changeset
 ### React
 
 ```tsx
-import { ImmersiveLayer, ImmersiveScroll } from '@immersive-scroll/react';
+import { ImmersiveLayer, ImmersiveScroll } from 'immersive-scroll';
 
 export function HeroStory() {
   return (
@@ -59,11 +60,12 @@ export function HeroStory() {
 }
 ```
 
-### CLI
+### Other entry points
 
-```bash
-npx immersive-scroll extract ./assets/video.mp4 ./public/immersive/hero --clean
-npx immersive-scroll validate ./public/immersive/hero
+```ts
+import { NextImmersiveScroll } from 'immersive-scroll/next';
+import { ImmersiveScroll as SolidImmersiveScroll } from 'immersive-scroll/solid';
+import { createImmersiveInstance } from 'immersive-scroll/web';
 ```
 
 ## Release flow
@@ -73,4 +75,4 @@ npx immersive-scroll validate ./public/immersive/hero
 3. The release workflow opens or updates a version PR.
 4. Merging that PR runs the publish job, rebuilds the workspace, and publishes public packages to npm.
 
-The release workflow expects an `NPM_TOKEN` repository secret with publish access to `immersive-scroll` and the `@immersive-scroll/*` scope.
+The release workflow expects an `NPM_TOKEN` repository secret with publish access to `immersive-scroll`.

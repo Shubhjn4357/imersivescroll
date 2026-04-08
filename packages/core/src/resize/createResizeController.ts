@@ -1,5 +1,8 @@
 import type { Subscriber, Unsubscribe } from '@immersive-scroll/shared';
-import { createViewportObserver, type ViewportSnapshot } from '../viewport/createViewportObserver';
+import {
+  createViewportObserver,
+  type ViewportSnapshot
+} from '../viewport/createViewportObserver';
 
 export function createResizeController(container: HTMLElement | null) {
   const observer = createViewportObserver(container);

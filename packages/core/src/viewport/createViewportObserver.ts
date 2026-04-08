@@ -7,9 +7,16 @@ export interface ViewportSnapshot {
 }
 
 function readViewport(container: HTMLElement | null): ViewportSnapshot {
-  const width = container?.clientWidth ?? (typeof window !== 'undefined' ? window.innerWidth : 1280);
-  const height = container?.clientHeight ?? (typeof window !== 'undefined' ? window.innerHeight : 720);
-  const pixelRatio = typeof window !== 'undefined' ? Math.max(1, window.devicePixelRatio || 1) : 1;
+  const width =
+    container?.clientWidth ??
+    (typeof window !== 'undefined' ? window.innerWidth : 1280);
+  const height =
+    container?.clientHeight ??
+    (typeof window !== 'undefined' ? window.innerHeight : 720);
+  const pixelRatio =
+    typeof window !== 'undefined'
+      ? Math.max(1, window.devicePixelRatio || 1)
+      : 1;
   return { width, height, pixelRatio };
 }
 

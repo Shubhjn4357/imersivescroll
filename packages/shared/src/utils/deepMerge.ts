@@ -3,7 +3,10 @@ import type { DeepPartial } from '../types/utility';
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-export function deepMerge<TValue>(base: TValue, override: DeepPartial<TValue> | undefined): TValue {
+export function deepMerge<TValue>(
+  base: TValue,
+  override: DeepPartial<TValue> | undefined
+): TValue {
   if (!override) {
     return structuredClone(base);
   }

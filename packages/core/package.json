@@ -3,12 +3,22 @@
   "version": "0.1.0",
   "description": "Framework-agnostic immersive scroll engine.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shubhjn4357/imersivescroll.git"
+  },
+  "homepage": "https://github.com/Shubhjn4357/imersivescroll#readme",
+  "bugs": {
+    "url": "https://github.com/Shubhjn4357/imersivescroll/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

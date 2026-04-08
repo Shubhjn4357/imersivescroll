@@ -1,11 +1,18 @@
 import type { ImmersiveConfig } from './config';
 import type { ImmersiveEventMap } from './events';
-import type { FrameStoreLike, ScrollStoreLike, TimelineRegistryLike } from './plugin';
+import type {
+  FrameStoreLike,
+  ScrollStoreLike,
+  TimelineRegistryLike
+} from './plugin';
 import type { ImmersiveRenderer } from './renderer';
 import type { Subscriber, Unsubscribe } from './utility';
 
 export interface EventBusController {
-  emit<TKey extends keyof ImmersiveEventMap>(type: TKey, payload: ImmersiveEventMap[TKey]): void;
+  emit<TKey extends keyof ImmersiveEventMap>(
+    type: TKey,
+    payload: ImmersiveEventMap[TKey]
+  ): void;
   on<TKey extends keyof ImmersiveEventMap>(
     type: TKey,
     handler: Subscriber<ImmersiveEventMap[TKey]>

@@ -13,7 +13,8 @@ export function getTriggerActivation(
   const rangeStart = Math.min(start, end);
   const rangeEnd = Math.max(start, end);
   const active = progress >= rangeStart && progress <= rangeEnd;
-  const previousActive = previousProgress >= rangeStart && previousProgress <= rangeEnd;
+  const previousActive =
+    previousProgress >= rangeStart && previousProgress <= rangeEnd;
 
   return {
     active,

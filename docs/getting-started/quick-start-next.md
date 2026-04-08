@@ -5,10 +5,14 @@ Use the Next adapter when the page should stay server-rendered but the immersive
 ```tsx
 'use client';
 
-import { NextImmersiveScroll } from '@immersive-scroll/next';
+import { NextImmersiveScroll } from 'immersive-scroll/next';
 
 export function StoryHero() {
-  return <NextImmersiveScroll framesPath="/immersive/ocean">Story copy</NextImmersiveScroll>;
+  return (
+    <NextImmersiveScroll framesPath="/immersive/ocean">
+      Story copy
+    </NextImmersiveScroll>
+  );
 }
 ```
 

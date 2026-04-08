@@ -56,7 +56,11 @@ export function DocsFrame({
                 <p className="docs-sidebar__title">{group.title}</p>
                 <nav className="docs-sidebar__nav" aria-label={group.title}>
                   {group.links.map((link) => (
-                    <a className="docs-sidebar__link" href={link.href} key={link.href}>
+                    <a
+                      className="docs-sidebar__link"
+                      href={link.href}
+                      key={link.href}
+                    >
                       {link.title}
                     </a>
                   ))}
@@ -90,7 +94,11 @@ export function DocsFrame({
             <p className="docs-sidebar__title">On this page</p>
             <nav className="docs-sidebar__nav" aria-label="On this page">
               {resolvedSectionLinks.map((link) => (
-                <a className="docs-sidebar__link" href={link.href} key={link.href}>
+                <a
+                  className="docs-sidebar__link"
+                  href={link.href}
+                  key={link.href}
+                >
                   {link.title}
                 </a>
               ))}

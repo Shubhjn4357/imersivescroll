@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { withImmersiveClientOnly } from '@immersive-scroll/next';
+import { withImmersiveClientOnly } from 'immersive-scroll/next';
 
 describe('withImmersiveClientOnly', () => {
   it('exports a wrapper function', () => {

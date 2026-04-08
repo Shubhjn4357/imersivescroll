@@ -1,4 +1,4 @@
-import { createImmersiveInstance } from '@immersive-scroll/web';
+import { createImmersiveInstance } from 'immersive-scroll/web';
 import {
   landingDocsCards,
   landingFeatureCards,

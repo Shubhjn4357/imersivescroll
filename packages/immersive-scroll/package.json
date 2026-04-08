@@ -1,0 +1,73 @@
+{
+  "name": "immersive-scroll",
+  "version": "0.1.0",
+  "description": "Single-install immersive scroll package with React root exports and Next, Solid, and Web subpath adapters.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shubhjn4357/imersivescroll.git"
+  },
+  "homepage": "https://github.com/Shubhjn4357/imersivescroll#readme",
+  "bugs": {
+    "url": "https://github.com/Shubhjn4357/imersivescroll/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.js",
+      "require": "./dist/next.cjs"
+    },
+    "./solid": {
+      "types": "./dist/solid.d.ts",
+      "import": "./dist/solid.js",
+      "require": "./dist/solid.cjs"
+    },
+    "./web": {
+      "types": "./dist/web.d.ts",
+      "import": "./dist/web.js",
+      "require": "./dist/web.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "node -e \"process.exit(0)\""
+  },
+  "dependencies": {
+    "@immersive-scroll/next": "workspace:^",
+    "@immersive-scroll/react": "workspace:^",
+    "@immersive-scroll/solid": "workspace:^",
+    "@immersive-scroll/web": "workspace:^"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "next": "^15.5.14",
+    "solid-js": "^1.9.12"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
+    "solid-js": {
+      "optional": true
+    }
+  }
+}

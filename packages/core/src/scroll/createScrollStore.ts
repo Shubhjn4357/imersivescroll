@@ -1,5 +1,10 @@
 import { clamp } from '@immersive-scroll/shared';
-import type { ScrollState, ScrollUpdateInput, Subscriber, Unsubscribe } from '@immersive-scroll/shared';
+import type {
+  ScrollState,
+  ScrollUpdateInput,
+  Subscriber,
+  Unsubscribe
+} from '@immersive-scroll/shared';
 import { getScrollDirection } from './scrollDirection';
 import { INITIAL_SCROLL_STATE } from './scrollState';
 

@@ -1,4 +1,7 @@
-import type { ImmersivePlugin, PartialImmersiveConfig } from '@immersive-scroll/core';
+import type {
+  ImmersivePlugin,
+  PartialImmersiveConfig
+} from '@immersive-scroll/core';
 
 export interface CreateImmersiveInstanceOptions {
   container: HTMLElement;

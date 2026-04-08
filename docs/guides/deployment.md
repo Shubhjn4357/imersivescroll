@@ -15,4 +15,4 @@ Deployment rules are simple:
 
 Required repository secret:
 
-- `NPM_TOKEN`: npm token with access to publish `immersive-scroll` and the `@immersive-scroll/*` packages.
+- `NPM_TOKEN`: npm token with access to publish `immersive-scroll`.

@@ -1,13 +1,7 @@
 'use client';
 
 import type { PropsWithChildren } from 'react';
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState
-} from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 export type SiteTheme = 'dark' | 'light';
 

@@ -10,8 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@immersive-scroll/next": "workspace:^",
-    "@immersive-scroll/react": "workspace:^",
+    "immersive-scroll": "workspace:^",
     "next": "^15.5.14",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

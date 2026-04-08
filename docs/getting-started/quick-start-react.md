@@ -1,7 +1,7 @@
 # Quick Start: React
 
 ```tsx
-import { ImmersiveLayer, ImmersiveScroll } from '@immersive-scroll/react';
+import { ImmersiveLayer, ImmersiveScroll } from 'immersive-scroll';
 
 export function Hero() {
   return (

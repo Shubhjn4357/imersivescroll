@@ -3,8 +3,15 @@ import path from 'node:path';
 import ffmpegPath from 'ffmpeg-static';
 import type { ExtractionConfig } from '../types';
 
-export async function extractFrames(videoPath: string, outputFolder: string, config: ExtractionConfig): Promise<void> {
-  const outputPattern = path.join(outputFolder, `${config.prefix}-%05d.${config.format}`);
+export async function extractFrames(
+  videoPath: string,
+  outputFolder: string,
+  config: ExtractionConfig
+): Promise<void> {
+  const outputPattern = path.join(
+    outputFolder,
+    `${config.prefix}-%05d.${config.format}`
+  );
   const scaleFilter =
     config.width && config.height
       ? `scale=${config.width}:${config.height}:force_original_aspect_ratio=decrease`
@@ -17,7 +24,9 @@ export async function extractFrames(videoPath: string, outputFolder: string, con
   const args = ['-y', '-i', videoPath, '-vf', filter, outputPattern];
 
   await new Promise<void>((resolve, reject) => {
-    const processHandle = spawn(ffmpegPath ?? 'ffmpeg', args, { stdio: 'inherit' });
+    const processHandle = spawn(ffmpegPath ?? 'ffmpeg', args, {
+      stdio: 'inherit'
+    });
     processHandle.on('exit', (code) => {
       if (code === 0) {
         resolve();

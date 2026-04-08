@@ -5,7 +5,7 @@ import {
   createGsapTimeline,
   setupScrollTrigger,
   useScrollTriggerSetup
-} from '../../../packages/react/src';
+} from 'immersive-scroll';
 
 interface UseMarketingMotionOptions {
   disabled?: boolean;
@@ -87,7 +87,7 @@ export function useMarketingMotion(
 
         setupScrollTrigger(ScrollTrigger, {
           trigger,
-          start: 'top 75%',
+          start: 'top 25%',
           toggleActions: 'play none none reverse',
           animation
         });

@@ -1,5 +1,8 @@
 import type { DependencyList, RefObject } from 'react';
-import { registerGsapPlugins, type GsapRuntime } from '../gsap/registerGsapPlugins';
+import {
+  registerGsapPlugins,
+  type GsapRuntime
+} from '../gsap/registerGsapPlugins';
 import { useIsomorphicLayoutEffect } from './useIsomorphicLayoutEffect';
 import { useRef } from 'react';
 

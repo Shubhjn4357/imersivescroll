@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "..",
+    "jsx": "preserve",
+    "paths": {
+      "@immersive-scroll/react": ["../react/dist/index.d.ts"],
+      "@immersive-scroll/next": ["../next/dist/index.d.ts"],
+      "@immersive-scroll/solid": ["../solid/dist/index.d.ts"],
+      "@immersive-scroll/web": ["../web/dist/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}

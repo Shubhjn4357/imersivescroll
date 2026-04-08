@@ -12,7 +12,12 @@ export function useImmersiveTrigger(
   const { scroll } = useImmersiveContext();
   const previousProgressRef = useRef(scroll.progress);
 
-  const activation = getTriggerActivation(scroll.progress, previousProgressRef.current, start, end);
+  const activation = getTriggerActivation(
+    scroll.progress,
+    previousProgressRef.current,
+    start,
+    end
+  );
   previousProgressRef.current = scroll.progress;
 
   return activation;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ImmersiveScroll } from '@immersive-scroll/react';
+import { ImmersiveScroll } from 'immersive-scroll';
 
 describe('ImmersiveScroll', () => {
   it('exports a component', () => {

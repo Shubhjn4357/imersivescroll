@@ -8,7 +8,16 @@ describe('createManifest', () => {
       'hash',
       { width: 1920, height: 1080, fps: 30, duration: 10 },
       120,
-      { fps: 30, format: 'webp', quality: 82, fit: 'cover', prefix: 'frame', overwrite: false, clean: false, silent: false }
+      {
+        fps: 30,
+        format: 'webp',
+        quality: 82,
+        fit: 'cover',
+        prefix: 'frame',
+        overwrite: false,
+        clean: false,
+        silent: false
+      }
     );
 
     expect(manifest.frameCount).toBe(120);

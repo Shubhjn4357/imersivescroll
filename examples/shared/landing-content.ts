@@ -157,7 +157,8 @@ export const landingSections: LandingSection[] = [
     id: 'scrub-engine',
     index: '02',
     eyebrow: 'Scrub engine',
-    title: 'Use frame-accurate progress mapping instead of fragile scroll hacks.',
+    title:
+      'Use frame-accurate progress mapping instead of fragile scroll hacks.',
     description:
       'The render surface tracks component-relative progress, not the whole document, which keeps multi-section stories stable and removes drift.',
     align: 'right',
@@ -171,7 +172,8 @@ export const landingSections: LandingSection[] = [
     id: 'gsap-layer',
     index: '03',
     eyebrow: 'Motion layer',
-    title: 'Layer GSAP and ScrollTrigger on top for premium content choreography.',
+    title:
+      'Layer GSAP and ScrollTrigger on top for premium content choreography.',
     description:
       'ScrollTrigger drives the reveal timing, floating offsets, and section transitions while native scroll stays intact underneath.',
     align: 'left',

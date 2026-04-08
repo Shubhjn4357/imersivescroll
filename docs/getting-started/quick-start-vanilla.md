@@ -1,7 +1,7 @@
 # Quick Start: Vanilla Web
 
 ```ts
-import { createImmersiveInstance } from '@immersive-scroll/web';
+import { createImmersiveInstance } from 'immersive-scroll/web';
 
 const hero = document.querySelector('#hero');
 if (hero) {

@@ -87,10 +87,10 @@ export function DocsPage() {
         <div className="docs-section__header">
           <h2>Introduction</h2>
           <p>
-            `immersive-scroll` is a scene wrapper for frame-sequence storytelling.
-            It pins a viewport, renders frames on a canvas, and exposes the
-            scene state through React hooks so overlays and supporting UI stay
-            predictable.
+            `immersive-scroll` is a scene wrapper for frame-sequence
+            storytelling. It pins a viewport, renders frames on a canvas, and
+            exposes the scene state through React hooks so overlays and
+            supporting UI stay predictable.
           </p>
         </div>
 
@@ -106,8 +106,8 @@ export function DocsPage() {
           <article className="docs-card">
             <h3>What you still own</h3>
             <p>
-              You still control the art direction, story layout, overlay
-              design, and the page shell around the scene.
+              You still control the art direction, story layout, overlay design,
+              and the page shell around the scene.
             </p>
           </article>
           <article className="docs-card">
@@ -161,8 +161,8 @@ export function DocsPage() {
             directory with a matching manifest.
           </li>
           <li>
-            Mount <code>{'<ImmersiveScroll />'}</code> with <code>framesPath</code>{' '}
-            and only the config you actually need.
+            Mount <code>{'<ImmersiveScroll />'}</code> with{' '}
+            <code>framesPath</code> and only the config you actually need.
           </li>
           <li>
             Add overlay UI through <code>{'<ImmersiveLayer />'}</code> and read
@@ -218,7 +218,9 @@ export function DocsPage() {
               </div>
               <div className="docs-inline-list">
                 <span className="docs-chip">{hook.signature}</span>
-                <span className="docs-chip docs-chip--muted">{hook.returns}</span>
+                <span className="docs-chip docs-chip--muted">
+                  {hook.returns}
+                </span>
               </div>
               <pre className="code-block">
                 <code>{hook.usage}</code>

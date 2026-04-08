@@ -1,4 +1,7 @@
-import type { FrameFormat, ImmersiveFrameManifest } from '@immersive-scroll/core';
+import type {
+  FrameFormat,
+  ImmersiveFrameManifest
+} from '@immersive-scroll/core';
 
 export interface ExtractOptions {
   fps?: number;

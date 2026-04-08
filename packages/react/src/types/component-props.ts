@@ -19,8 +19,7 @@ export interface ImmersiveScrollbarPlacementProps {
   left?: number;
 }
 
-export interface ImmersiveScrollbarProps
-  extends ImmersiveScrollbarPlacementProps {
+export interface ImmersiveScrollbarProps extends ImmersiveScrollbarPlacementProps {
   visible?: boolean;
   interactive?: boolean;
   className?: string;

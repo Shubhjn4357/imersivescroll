@@ -75,13 +75,17 @@ export function PlaygroundPage() {
           <h2>Implementation modes</h2>
           <p>
             The playground compares the two common scene delivery strategies so
-            you can choose the one that fits your quality and performance budget.
+            you can choose the one that fits your quality and performance
+            budget.
           </p>
         </div>
 
         <div className="docs-stack">
           {playgroundImplementationModes.map((collection) => (
-            <article className="docs-card docs-card--wide" key={collection.title}>
+            <article
+              className="docs-card docs-card--wide"
+              key={collection.title}
+            >
               <div className="docs-card__header">
                 <span className="docs-chip">{collection.eyebrow}</span>
                 <h3>{collection.title}</h3>

@@ -6,7 +6,7 @@ import {
   ImmersiveScroll,
   useImmersiveFrame,
   useImmersiveProgress
-} from '../../../packages/react/src';
+} from 'immersive-scroll';
 import {
   landingImmersiveConfig,
   landingSource,
@@ -36,7 +36,12 @@ const demoSidebarGroups: readonly DocsSidebarGroup[] = [
 
 function BugIcon() {
   return (
-    <svg aria-hidden="true" className="icon-button__icon" fill="none" viewBox="0 0 24 24">
+    <svg
+      aria-hidden="true"
+      className="icon-button__icon"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <path
         d="M9 7.5V5.8A3 3 0 0 1 12 3a3 3 0 0 1 3 2.8v1.7M6.8 9h10.4M8 13h8M9 17h6M5 9l-2-2M19 9l2-2M5 15l-2 2M19 15l2 2"
         stroke="currentColor"
@@ -50,7 +55,12 @@ function BugIcon() {
 
 function ScrollbarIcon() {
   return (
-    <svg aria-hidden="true" className="icon-button__icon" fill="none" viewBox="0 0 24 24">
+    <svg
+      aria-hidden="true"
+      className="icon-button__icon"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <path
         d="M18 4.5v15M18 9.5h-2.5a1.5 1.5 0 0 0-1.5 1.5v2a1.5 1.5 0 0 0 1.5 1.5H18M8 6.5H6a1.5 1.5 0 0 0-1.5 1.5v8A1.5 1.5 0 0 0 6 17.5h2"
         stroke="currentColor"
@@ -85,7 +95,12 @@ export function DemoPage() {
   return (
     <DocsFrame
       activeHref="/demo"
-      badges={['Live preview', 'Debug toggle', 'Scrollbar toggle', 'Light/Dark ready']}
+      badges={[
+        'Live preview',
+        'Debug toggle',
+        'Scrollbar toggle',
+        'Light/Dark ready'
+      ]}
       description="This page is the closest thing to a component reference demo. It shows the immersive scene in context, exposes the common toggles people need while integrating it, and keeps the usage guidance next to the live surface."
       eyebrow="Demo"
       navigationLinks={nextDemoNavigationLinks}
@@ -163,7 +178,10 @@ export function DemoPage() {
           >
             <div className="demo-scene__content">
               <section className="story-panel story-panel--hero story-panel--left">
-                <article className="story-card story-card--hero" data-align="left">
+                <article
+                  className="story-card story-card--hero"
+                  data-align="left"
+                >
                   <p className="eyebrow">ImmersiveScroll</p>
                   <h2>Pin the viewport and let the story move through it.</h2>
                   <p>
@@ -173,7 +191,10 @@ export function DemoPage() {
                 </article>
               </section>
               <section className="story-panel story-panel--right story-panel--compact">
-                <article className="story-card story-card--compact" data-align="right">
+                <article
+                  className="story-card story-card--compact"
+                  data-align="right"
+                >
                   <p className="eyebrow">Overlay layer</p>
                   <h2>Toolbars, badges, and HUDs live above the scene.</h2>
                   <p>
@@ -286,9 +307,13 @@ export function DemoPage() {
         <div className="docs-inline-list">
           <span className="docs-chip">config.scrollbar.position</span>
           <span className="docs-chip">config.scrollbar.positionMode</span>
-          <span className="docs-chip">config.scrollbar.top/right/bottom/left</span>
+          <span className="docs-chip">
+            config.scrollbar.top/right/bottom/left
+          </span>
           <span className="docs-chip">scrollbarProps.positionMode</span>
-          <span className="docs-chip">useImmersiveScrollbar().scrollToProgress()</span>
+          <span className="docs-chip">
+            useImmersiveScrollbar().scrollToProgress()
+          </span>
         </div>
       </section>
 

@@ -7,7 +7,7 @@ import {
   ImmersiveScroll,
   useImmersiveFrame,
   useImmersiveProgress
-} from '../../../packages/react/src';
+} from 'immersive-scroll';
 import {
   defaultLandingActions,
   defaultLandingDestinationCards,
@@ -25,7 +25,12 @@ import { SiteChrome } from './SiteChrome';
 
 function BugIcon() {
   return (
-    <svg aria-hidden="true" className="icon-button__icon" fill="none" viewBox="0 0 24 24">
+    <svg
+      aria-hidden="true"
+      className="icon-button__icon"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <path
         d="M9 7.5V5.8A3 3 0 0 1 12 3a3 3 0 0 1 3 2.8v1.7M6.8 9h10.4M8 13h8M9 17h6M5 9l-2-2M19 9l2-2M5 15l-2 2M19 15l2 2"
         stroke="currentColor"
@@ -39,7 +44,12 @@ function BugIcon() {
 
 function ScrollbarIcon() {
   return (
-    <svg aria-hidden="true" className="icon-button__icon" fill="none" viewBox="0 0 24 24">
+    <svg
+      aria-hidden="true"
+      className="icon-button__icon"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <path
         d="M18 4.5v15M18 9.5h-2.5a1.5 1.5 0 0 0-1.5 1.5v2a1.5 1.5 0 0 0 1.5 1.5H18M8 6.5H6a1.5 1.5 0 0 0-1.5 1.5v8A1.5 1.5 0 0 0 6 17.5h2"
         stroke="currentColor"
@@ -142,10 +152,10 @@ export function ImmersiveLanding({
             <article className="docs-code-card">
               <div className="docs-code-card__header">
                 <span className="docs-chip">Install</span>
-                <h3>Start with the React adapter</h3>
+                <h3>Start with the public package</h3>
               </div>
               <pre className="code-block">
-                <code>pnpm add @immersive-scroll/react gsap</code>
+                <code>pnpm add immersive-scroll gsap</code>
               </pre>
             </article>
           </aside>

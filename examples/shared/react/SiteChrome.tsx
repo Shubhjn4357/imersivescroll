@@ -91,7 +91,9 @@ export function SiteChrome({
 
           <button
             aria-label={
-              theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
+              theme === 'dark'
+                ? 'Switch to light theme'
+                : 'Switch to dark theme'
             }
             className="icon-button"
             type="button"
@@ -107,7 +109,9 @@ export function SiteChrome({
       <footer className="site-footer">
         <span>Shared design source for Next.js, React, Solid, and Web.</span>
         {footer ?? (
-          <span>Use `pnpm dev:landing` to iterate on the primary site surface.</span>
+          <span>
+            Use `pnpm dev:landing` to iterate on the primary site surface.
+          </span>
         )}
       </footer>
     </div>

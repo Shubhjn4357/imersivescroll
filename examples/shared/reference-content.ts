@@ -34,11 +34,11 @@ export interface RuntimeStageCard {
 export const docsQuickstartSnippets: readonly CodeSnippet[] = [
   {
     eyebrow: 'Install',
-    title: 'Add the React adapter and motion layer.',
+    title: 'Add the public package and motion layer.',
     description:
-      'The React adapter owns the sticky viewport and canvas lifecycle. GSAP is optional, but it is the intended companion for premium section choreography.',
+      'The root package exports the React surface. GSAP is optional, but it is the intended companion for premium section choreography.',
     language: 'bash',
-    code: `pnpm add @immersive-scroll/react gsap`
+    code: `pnpm add immersive-scroll gsap`
   },
   {
     eyebrow: 'First render',
@@ -46,7 +46,7 @@ export const docsQuickstartSnippets: readonly CodeSnippet[] = [
     description:
       'Use a public frame directory plus the generated manifest. The overlay stays separate from the story content so you can evolve them independently.',
     language: 'tsx',
-    code: `'use client';\n\nimport {\n  ImmersiveLayer,\n  ImmersiveScroll,\n  useImmersiveFrame,\n  useImmersiveProgress\n} from '@immersive-scroll/react';\n\nfunction SceneStatus() {\n  const frame = useImmersiveFrame();\n  const { progress } = useImmersiveProgress();\n\n  return (\n    <div>\n      <span>Progress {Math.round(progress * 100)}%</span>\n      <span>Frame {frame.currentFrame + 1}</span>\n    </div>\n  );\n}\n\nexport function ProductHero() {\n  return (\n    <ImmersiveScroll\n      framesPath=\"/immersive/launch\"\n      config={{\n        visual: { objectFit: 'cover' },\n        scrollbar: { enabled: true, visibilityMode: 'manual' }\n      }}\n      overlay={\n        <ImmersiveLayer>\n          <SceneStatus />\n        </ImmersiveLayer>\n      }\n    >\n      <section>{/* story panels */}</section>\n    </ImmersiveScroll>\n  );\n}`
+    code: `'use client';\n\nimport {\n  ImmersiveLayer,\n  ImmersiveScroll,\n  useImmersiveFrame,\n  useImmersiveProgress\n} from 'immersive-scroll';\n\nfunction SceneStatus() {\n  const frame = useImmersiveFrame();\n  const { progress } = useImmersiveProgress();\n\n  return (\n    <div>\n      <span>Progress {Math.round(progress * 100)}%</span>\n      <span>Frame {frame.currentFrame + 1}</span>\n    </div>\n  );\n}\n\nexport function ProductHero() {\n  return (\n    <ImmersiveScroll\n      framesPath=\"/immersive/launch\"\n      config={{\n        visual: { objectFit: 'cover' },\n        scrollbar: { enabled: true, visibilityMode: 'manual' }\n      }}\n      overlay={\n        <ImmersiveLayer>\n          <SceneStatus />\n        </ImmersiveLayer>\n      }\n    >\n      <section>{/* story panels */}</section>\n    </ImmersiveScroll>\n  );\n}`
   },
   {
     eyebrow: 'Asset prep',
@@ -163,7 +163,7 @@ export const componentReferenceSections: readonly ReferenceSection[] = [
       },
       {
         name: 'position / positionMode / offset / top / right / bottom / left',
-        type: "placement props",
+        type: 'placement props',
         description:
           'Lets a single scene instance reposition the scrollbar without mutating shared CSS or editing the component internals.'
       },
@@ -274,8 +274,7 @@ export const hookReferenceItems: readonly HookReference[] = [
     signature: 'const trigger = useImmersiveTrigger(start, end)',
     description:
       'Maps a progress segment into active, entered, and left states for declarative section behavior.',
-    returns:
-      '{ active, entered, left, progress, direction }',
+    returns: '{ active, entered, left, progress, direction }',
     usage: `const trigger = useImmersiveTrigger(0.3, 0.5);\nconst activeClassName = trigger.active ? 'is-active' : '';`,
     notes: [
       'Use this when GSAP would be excessive for a simple state toggle.',
@@ -421,7 +420,7 @@ export const configReferenceSections: readonly ReferenceSection[] = [
       },
       {
         name: 'objectFit / objectPosition',
-        type: "ObjectFitMode / string",
+        type: 'ObjectFitMode / string',
         description:
           'Controls how frames fill the viewport and how the crop anchor should behave.',
         defaultValue: "'cover' / 'center center'"
@@ -443,21 +442,19 @@ export const configReferenceSections: readonly ReferenceSection[] = [
       {
         name: 'position / width / radius / offset',
         type: 'string / number',
-        description:
-          'Controls rail placement and base geometry.',
+        description: 'Controls rail placement and base geometry.',
         defaultValue: "'right' / 6 / 999 / 16"
       },
       {
         name: 'positionMode / top / right / bottom / left',
-        type: "placement values",
+        type: 'placement values',
         description:
           'Controls whether the rail is placed absolutely within the immersive viewport or fixed to the window, and lets each edge be tuned independently.'
       },
       {
         name: 'trackOpacity / thumbOpacity',
         type: 'number',
-        description:
-          'Controls the resting visibility of both rails.',
+        description: 'Controls the resting visibility of both rails.',
         defaultValue: '0.2 / 0.75'
       },
       {
@@ -526,8 +523,7 @@ export const configReferenceSections: readonly ReferenceSection[] = [
       {
         name: 'showFrameIndex / showProgress / showVelocity / showManifestStatus',
         type: 'boolean',
-        description:
-          'Toggles individual fields in the packaged debug HUD.',
+        description: 'Toggles individual fields in the packaged debug HUD.',
         defaultValue: 'false'
       }
     ]
