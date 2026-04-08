@@ -12,7 +12,7 @@ export default [
       'node_modules/**',
       '**/.next/**',
       '.next/**',
-      'vitest.workspace.ts'
+      'vitest.config.ts'
     ]
   },
   {
@@ -34,8 +34,14 @@ export default [
     },
     rules: {
       ...tsEslint.configs.recommended.rules,
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports' }
+      ],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+      ],
       '@typescript-eslint/no-explicit-any': 'off'
     }
   },
