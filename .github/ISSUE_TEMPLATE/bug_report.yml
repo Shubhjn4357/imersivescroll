@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a runtime, adapter, docs, or asset-pipeline issue.
+title: '[Bug]: '
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the bug and the impact.
+      placeholder: The custom scrollbar does not respond to pointer input in the React adapter.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: List the commands, route, package, and steps needed to reproduce the issue.
+      placeholder: |
+        1. Run `pnpm dev:landing`
+        2. Open `/demo`
+        3. Drag the scrollbar thumb
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include package name, browser, OS, and any relevant versions.
+      placeholder: '@immersive-scroll/react, Chrome 135, Windows 11, Node 20'

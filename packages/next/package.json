@@ -1,0 +1,36 @@
+{
+  "name": "@immersive-scroll/next",
+  "version": "0.1.0",
+  "description": "Next.js adapter for immersive scroll video.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@immersive-scroll/core": "workspace:^",
+    "@immersive-scroll/react": "workspace:^",
+    "@immersive-scroll/shared": "workspace:^",
+    "next": "^15.5.14",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  }
+}

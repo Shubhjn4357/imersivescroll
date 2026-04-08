@@ -1,0 +1,66 @@
+{
+  "name": "immersive-scroll-video",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "description": "Production-grade immersive scroll video monorepo.",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "node scripts/build-all.mjs",
+    "ci:verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "clean": "node scripts/clean-all.mjs",
+    "dev": "node scripts/dev-all.mjs",
+    "dev:landing": "pnpm --filter @immersive-scroll-example/next-demo dev",
+    "format": "prettier --write .",
+    "lint": "cross-env NODE_NO_WARNINGS=1 eslint . --max-warnings 0",
+    "prepare:example-assets": "node scripts/prepare-example-assets.mjs",
+    "test": "node scripts/test-all.mjs",
+    "typecheck": "node scripts/typecheck-all.mjs",
+    "docs": "typedoc",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
+    "release:ci": "pnpm ci:verify && changeset publish",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.10",
+    "@next/eslint-plugin-next": "^16.2.3",
+    "@playwright/test": "^1.54.2",
+    "@types/fluent-ffmpeg": "^2.1.27",
+    "@types/node": "^24.7.2",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "@vitejs/plugin-react": "^5.1.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.37.0",
+    "husky": "^9.1.7",
+    "jsdom": "^26.1.0",
+    "lint-staged": "^15.5.2",
+    "next": "^15.5.3",
+    "playwright": "^1.54.2",
+    "prettier": "^3.6.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "rimraf": "^6.0.1",
+    "solid-js": "^1.9.9",
+    "tsup": "^8.5.0",
+    "typedoc": "^0.28.14",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.10",
+    "vite-plugin-solid": "^2.11.8",
+    "vitest": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,json,md,css,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}

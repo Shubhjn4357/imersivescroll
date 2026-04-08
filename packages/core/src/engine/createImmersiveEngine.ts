@@ -1,0 +1,216 @@
+import type {
+  ImmersiveEngineContext,
+  ImmersiveFrameManifest,
+  ImmersivePlugin,
+  PartialImmersiveConfig
+} from '@immersive-scroll/shared';
+import { toError } from '@immersive-scroll/shared';
+import { normalizeImmersiveConfig } from '../config/normalizeConfig';
+import { createEventBus } from '../events/createEventBus';
+import { calculateFrameIndexFromProgress } from '../frame/calculateFrameIndex';
+import { createFrameStore } from '../frame/createFrameStore';
+import { resolveFrameUrl } from '../frame/frameManifest';
+import { loadFrameImage } from '../frame/loadFrameImage';
+import { loadManifest } from '../manifest/loadManifest';
+import { resolveManifestPath } from '../manifest/resolveManifestPath';
+import { createPluginManager } from '../plugins/createPluginManager';
+import { createProgressController } from '../progress/createProgressController';
+import {
+  createRenderer,
+  type RendererTargets
+} from '../render/factory/createRenderer';
+import { createResizeController } from '../resize/createResizeController';
+import { createScrollStore } from '../scroll/createScrollStore';
+import { createTimelineRegistry } from '../timeline/createTimelineRegistry';
+import { createViewportObserver } from '../viewport/createViewportObserver';
+
+export interface CreateImmersiveEngineOptions {
+  config?: PartialImmersiveConfig;
+  container?: HTMLElement | null;
+  targets?: RendererTargets;
+  plugins?: ImmersivePlugin[];
+  manifest?: ImmersiveFrameManifest | null;
+}
+
+/** Create the framework-agnostic immersive engine. */
+export function createImmersiveEngine(
+  options: CreateImmersiveEngineOptions = {}
+) {
+  const config = normalizeImmersiveConfig(options.config);
+  const frameStore = createFrameStore();
+  const scrollStore = createScrollStore();
+  const timelineRegistry = createTimelineRegistry();
+  const eventBus = createEventBus();
+  const renderer = createRenderer(config, options.targets ?? {});
+  const viewportObserver = createViewportObserver(options.container ?? null);
+  const resizeController = createResizeController(options.container ?? null);
+  const progressController = createProgressController();
+  let lastRenderRequest = 0;
+  let destroyed = false;
+
+  let context: ImmersiveEngineContext = {
+    config,
+    eventBus,
+    scrollStore,
+    frameStore,
+    timelineRegistry,
+    viewport: viewportObserver.getSnapshot(),
+    container: options.container ?? null,
+    renderer
+  };
+
+  const pluginManager = createPluginManager(options.plugins ?? [], context);
+
+  const viewportUnsubscribe = viewportObserver.subscribe((viewport) => {
+    context = { ...context, viewport };
+    renderer?.resize(viewport.width, viewport.height, viewport.pixelRatio);
+    eventBus.emit('resize', viewport);
+    void pluginManager.onResize();
+  });
+
+  const scrollUnsubscribe = scrollStore.subscribe((scroll) => {
+    eventBus.emit('progress', {
+      progress: scroll.progress,
+      velocity: scroll.velocity,
+      direction: scroll.direction
+    });
+    void pluginManager.onScroll();
+  });
+
+  const setManifest = async (manifest: ImmersiveFrameManifest | null) => {
+    frameStore.setManifest(manifest);
+    if (!manifest) {
+      return;
+    }
+
+    eventBus.emit('ready', { manifest });
+    config.events.onReady?.({ manifestPath: resolveManifestPath(config) });
+    await pluginManager.onReady();
+  };
+
+  const renderCurrentFrame = async () => {
+    const manifest = frameStore.getState().manifest;
+    if (!manifest || !renderer || destroyed) {
+      return;
+    }
+
+    const renderRequest = ++lastRenderRequest;
+
+    try {
+      const frameIndex = frameStore.getState().currentFrame;
+      const image = await loadFrameImage(resolveFrameUrl(manifest, frameIndex));
+      if (destroyed || renderRequest !== lastRenderRequest) {
+        return;
+      }
+      renderer.render({ frameIndex, image });
+    } catch (error) {
+      const resolvedError = toError(error);
+      frameStore.setError(resolvedError);
+      config.events.onError?.(resolvedError);
+      eventBus.emit('error', { error: resolvedError });
+    }
+  };
+
+  return {
+    config,
+    getContext(): ImmersiveEngineContext {
+      return context;
+    },
+    async init() {
+      renderer?.mount();
+      const viewport = viewportObserver.getSnapshot();
+      renderer?.resize(viewport.width, viewport.height, viewport.pixelRatio);
+      await pluginManager.setup();
+
+      if (options.manifest) {
+        await setManifest(options.manifest);
+        await renderCurrentFrame();
+        return;
+      }
+
+      const manifestPath = resolveManifestPath(config);
+      if (manifestPath) {
+        await setManifest(await loadManifest(manifestPath));
+        await renderCurrentFrame();
+      }
+    },
+    async setManifest(manifest: ImmersiveFrameManifest) {
+      await setManifest(manifest);
+      await renderCurrentFrame();
+    },
+    async updateProgress(progress: number) {
+      const normalized = progressController.setProgress(progress);
+      scrollStore.update({ progress: normalized });
+
+      const totalFrames =
+        frameStore.getState().totalFrames ||
+        frameStore.getState().manifest?.frameCount ||
+        1;
+      const frameIndex = calculateFrameIndexFromProgress(
+        normalized,
+        totalFrames
+      );
+
+      frameStore.setCurrentFrame(frameIndex);
+      config.events.onProgress?.(normalized);
+      config.events.onFrameChange?.(frameIndex);
+      eventBus.emit('frameChange', { frameIndex, totalFrames });
+      await pluginManager.onFrameChange(frameIndex);
+      await renderCurrentFrame();
+    },
+    updateScroll(scrollY: number, velocity = 0) {
+      const previousState = scrollStore.getState();
+      const nextIsScrolling = Math.abs(velocity) > 0;
+
+      scrollStore.update({ scrollY, velocity, isScrolling: nextIsScrolling });
+      const nextScrollState = scrollStore.getState();
+
+      if (!previousState.isScrolling && nextIsScrolling) {
+        config.events.onScrollStart?.();
+        eventBus.emit('scrollStart', nextScrollState);
+      }
+    },
+    endScroll(scrollY = scrollStore.getState().scrollY) {
+      const previousState = scrollStore.getState();
+
+      scrollStore.update({
+        scrollY,
+        velocity: 0,
+        direction: 'idle',
+        isScrolling: false
+      });
+      const nextScrollState = scrollStore.getState();
+
+      if (previousState.isScrolling) {
+        config.events.onScrollEnd?.();
+        eventBus.emit('scrollEnd', nextScrollState);
+      }
+    },
+    pause() {
+      scrollStore.pause();
+    },
+    resume() {
+      scrollStore.resume();
+    },
+    subscribeFrame: frameStore.subscribe,
+    subscribeScroll: scrollStore.subscribe,
+    getState() {
+      return {
+        frame: frameStore.getState(),
+        scroll: scrollStore.getState()
+      };
+    },
+    async destroy() {
+      destroyed = true;
+      lastRenderRequest += 1;
+      await pluginManager.onDestroy();
+      viewportUnsubscribe();
+      scrollUnsubscribe();
+      resizeController.disconnect();
+      viewportObserver.disconnect();
+      renderer?.destroy();
+      eventBus.emit('destroy', { reason: 'manual' });
+      eventBus.clear();
+    }
+  };
+}

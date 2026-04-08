@@ -1,0 +1,37 @@
+{
+  "name": "@immersive-scroll/react",
+  "version": "0.1.0",
+  "description": "React adapter for immersive scroll video.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "src/styles"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run tests/integration/react"
+  },
+  "dependencies": {
+    "@immersive-scroll/core": "workspace:^",
+    "@immersive-scroll/shared": "workspace:^",
+    "@studio-freight/lenis": "^1.0.42",
+    "gsap": "^3.14.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  }
+}

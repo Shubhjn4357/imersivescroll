@@ -1,0 +1,11 @@
+export { ImmersiveCanvas } from './components/ImmersiveCanvas';
+export { ImmersiveFloating } from './components/ImmersiveFloating';
+export { ImmersiveLayer } from './components/ImmersiveLayer';
+export { ImmersiveScroll } from './components/ImmersiveScroll';
+export { ImmersiveScrollbar } from './components/ImmersiveScrollbar';
+export { ImmersiveTriggerZone } from './components/ImmersiveTriggerZone';
+export { useImmersiveConfig } from './hooks/useImmersiveConfig';
+export { useImmersiveFrame } from './hooks/useImmersiveFrame';
+export { useImmersiveProgress } from './hooks/useImmersiveProgress';
+export { useImmersiveScroll } from './hooks/useImmersiveScroll';
+export { useImmersiveTrigger } from './hooks/useImmersiveTrigger';

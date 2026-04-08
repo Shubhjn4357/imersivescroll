@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "videoHash": "pixabay-ocean-scroll-demo",
+  "sourceVideo": "https://cdn.pixabay.com/video/2024/02/21/201418-915375422_large.mp4",
+  "frameCount": 48,
+  "fps": 12,
+  "width": 640,
+  "height": 360,
+  "format": "jpg",
+  "quality": 82,
+  "framePattern": "frame-%05d.jpg",
+  "framePrefix": "frame",
+  "generatedAt": "2026-04-08T07:35:00.072Z",
+  "generator": "immersive-scroll example asset prep",
+  "configFingerprint": "12:jpg:640x360",
+  "framesPath": "/immersive/ocean"
+}
