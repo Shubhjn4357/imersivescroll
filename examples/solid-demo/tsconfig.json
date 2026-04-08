@@ -4,7 +4,7 @@
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "noEmit": true,
-    "rootDir": ".."
+    "rootDir": "../.."
   },
   "include": ["src/**/*", "vite.config.ts"]
 }
