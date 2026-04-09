@@ -1,6 +1,6 @@
 {
   "name": "@immersive-scroll/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI for immersive scroll frame extraction and validation.",
   "license": "MIT",
   "repository": {

@@ -126,9 +126,10 @@ export function DemoPage() {
         <div className="docs-section__header">
           <h2>Preview</h2>
           <p>
-            The preview uses the actual React package surface. The toolbar lets
-            you turn the debug overlay and the packaged scrollbar on or off
-            without touching internal code.
+            The preview uses the actual React package surface. The scene stays
+            fixed and full-page by default while the story panels drive the
+            scrub, and the toolbar only changes the packaged debug and scrollbar
+            chrome.
           </p>
         </div>
 
@@ -269,8 +270,9 @@ export function DemoPage() {
           <article className="docs-card">
             <h3>Root scene</h3>
             <p>
-              Use <code>{'<ImmersiveScroll />'}</code> for the pinned viewport,
-              frame loading, scrollbar rendering, and scene progress mapping.
+              Use <code>{'<ImmersiveScroll />'}</code> for the fixed full-screen
+              viewport, frame loading, scrollbar rendering, and scene progress
+              mapping.
             </p>
           </article>
           <article className="docs-card">

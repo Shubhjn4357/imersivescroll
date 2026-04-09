@@ -132,11 +132,11 @@ export const landingHero = {
   eyebrow: 'Immersive Scroll Video',
   title: 'Build polished scroll cinema without sacrificing native scroll.',
   description:
-    'A mobile-first component system for frame sequences, sticky canvases, configurable scene chrome, shipped CLI tooling, and cross-framework adapters.'
+    'A mobile-first component system for frame sequences, fixed full-screen scenes, configurable scene chrome, shipped CLI tooling, and cross-framework adapters.'
 };
 
 export const landingMetrics: LandingMetric[] = [
-  { label: 'Core pattern', value: 'Sticky canvas + scrub' },
+  { label: 'Core pattern', value: 'Fixed viewport + scrub' },
   { label: 'Source pipeline', value: '24/30 fps -> WebP' },
   { label: 'Controls', value: 'Typed hooks + props' }
 ];
@@ -425,7 +425,7 @@ export const playgroundStackCards: LandingCard[] = [
 export const playgroundImplementationModes: ContentCollection[] = [
   {
     eyebrow: 'Recommended mode',
-    title: 'Frame sequence on a sticky canvas',
+    title: 'Frame sequence on a fixed full-screen canvas',
     description:
       'This is the pattern used in the landing because it is the most reliable way to preserve visual precision.',
     items: [

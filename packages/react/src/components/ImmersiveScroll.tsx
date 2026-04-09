@@ -8,20 +8,33 @@ import { ImmersiveCanvas } from './ImmersiveCanvas';
 import { ImmersiveDebugPanel } from './ImmersiveDebugPanel';
 import { ImmersiveScrollbar } from './ImmersiveScrollbar';
 
+const IMMERSIVE_LAYER_ORDER = {
+  viewport: 0,
+  content: 1
+} as const;
+
 function resolvePlacementStyle(
   placement: ImmersivePlacementProps,
-  fallbackPosition: ImmersivePlacementProps['position'],
-  fallbackInset?: ImmersivePlacementProps['inset'],
-  fallbackTop?: ImmersivePlacementProps['top']
+  options: {
+    defaultPosition: ImmersivePlacementProps['position'];
+    defaultInset?: ImmersivePlacementProps['inset'];
+    fixedInset?: ImmersivePlacementProps['inset'];
+    defaultZIndex?: ImmersivePlacementProps['zIndex'];
+  }
 ) {
+  const resolvedPosition = placement.position ?? options.defaultPosition;
+  const resolvedInset =
+    placement.inset ??
+    (resolvedPosition === 'fixed' ? options.fixedInset : options.defaultInset);
+
   return {
-    position: placement.position ?? fallbackPosition,
-    inset: placement.inset ?? fallbackInset,
-    top: placement.top ?? fallbackTop,
+    position: resolvedPosition,
+    inset: resolvedInset,
+    top: placement.top,
     right: placement.right,
     bottom: placement.bottom,
     left: placement.left,
-    zIndex: placement.zIndex
+    zIndex: placement.zIndex ?? options.defaultZIndex
   };
 }
 
@@ -45,17 +58,17 @@ export function ImmersiveScroll({
   const viewportRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const shouldPinViewport = config?.trigger?.pin ?? true;
-  const viewportPlacementStyle = resolvePlacementStyle(
-    viewportProps ?? {},
-    shouldPinViewport ? 'sticky' : 'relative',
-    undefined,
-    viewportProps?.inset === undefined ? 0 : undefined
-  );
-  const mediaPlacementStyle = resolvePlacementStyle(
-    mediaProps ?? {},
-    'absolute',
-    mediaProps?.inset ?? 0
-  );
+  const viewportPlacementStyle = resolvePlacementStyle(viewportProps ?? {}, {
+    defaultPosition: shouldPinViewport ? 'fixed' : 'relative',
+    fixedInset: 0,
+    defaultZIndex: IMMERSIVE_LAYER_ORDER.viewport
+  });
+  const mediaPlacementStyle = resolvePlacementStyle(mediaProps ?? {}, {
+    defaultPosition: 'absolute',
+    defaultInset: 0,
+    fixedInset: 0,
+    defaultZIndex: IMMERSIVE_LAYER_ORDER.viewport
+  });
 
   return (
     <ImmersiveScrollProvider
@@ -76,6 +89,7 @@ export function ImmersiveScroll({
           position: 'relative',
           minHeight: '100vh',
           overflow: 'hidden',
+          isolation: 'isolate',
           background: '#000000',
           color: '#ffffff',
           ...style
@@ -109,7 +123,13 @@ export function ImmersiveScroll({
           <ImmersiveScrollbar {...scrollbarProps} />
           {config?.debug?.enabled ? <ImmersiveDebugPanel /> : null}
         </div>
-        <div style={{ position: 'relative', zIndex: 1 }}>
+        <div
+          data-immersive-content="true"
+          style={{
+            position: 'relative',
+            zIndex: IMMERSIVE_LAYER_ORDER.content
+          }}
+        >
           {children ?? loadingFallback ?? errorFallback}
         </div>
       </div>

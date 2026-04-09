@@ -41,6 +41,7 @@ export function ImmersiveScroll(props: ImmersiveScrollProps) {
         style={{
           position: 'relative',
           overflow: 'hidden',
+          isolation: 'isolate',
           'min-height': '100vh'
         }}
       >
@@ -48,8 +49,9 @@ export function ImmersiveScroll(props: ImmersiveScrollProps) {
           ref={setViewport}
           style={{
             position:
-              props.config?.trigger?.pin === false ? 'relative' : 'sticky',
-            top: '0',
+              props.config?.trigger?.pin === false ? 'relative' : 'fixed',
+            inset: props.config?.trigger?.pin === false ? undefined : '0',
+            'z-index': '0',
             'min-height': '100vh',
             overflow: 'hidden',
             isolation: 'isolate'

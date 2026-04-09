@@ -47,8 +47,6 @@ export function HeroStory() {
   return (
     <ImmersiveScroll
       framesPath="/immersive/story"
-      viewportProps={{ position: 'sticky', top: 0 }}
-      mediaProps={{ position: 'absolute', inset: 0 }}
       config={controls.config}
       overlay={<ImmersiveLayer>Scene chrome</ImmersiveLayer>}
     >
@@ -57,6 +55,8 @@ export function HeroStory() {
   );
 }
 ```
+
+Pinned scenes default to a fixed full-screen viewport with an inset media layer. Use `viewportProps` or `mediaProps` only when you need a contained layout, custom offsets, or a different stacking order.
 
 ## Local development
 

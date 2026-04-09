@@ -44,9 +44,9 @@ export const docsQuickstartSnippets: readonly CodeSnippet[] = [
     eyebrow: 'First render',
     title: 'Mount the immersive surface with a frame sequence.',
     description:
-      'Use a public frame directory plus the generated manifest. The overlay stays separate from the story content so you can evolve them independently, and placement props keep the viewport/media layer configurable.',
+      'Use a public frame directory plus the generated manifest. The overlay stays separate from the story content so you can evolve them independently, and placement props stay available when you need a contained or offset scene instead of the default fixed full-screen viewport.',
     language: 'tsx',
-    code: `'use client';\n\nimport {\n  ImmersiveLayer,\n  ImmersiveScroll,\n  useImmersiveConfigControls,\n  useImmersiveFrame,\n  useImmersiveProgress\n} from 'immersive-scroll';\n\nfunction SceneStatus() {\n  const frame = useImmersiveFrame();\n  const { progress } = useImmersiveProgress();\n\n  return (\n    <div>\n      <span>Progress {Math.round(progress * 100)}%</span>\n      <span>Frame {frame.currentFrame + 1}</span>\n    </div>\n  );\n}\n\nexport function ProductHero() {\n  const controls = useImmersiveConfigControls({\n    initialConfig: {\n      visual: { objectFit: 'cover' },\n      scrollbar: { enabled: true, visibilityMode: 'manual' }\n    }\n  });\n\n  return (\n    <ImmersiveScroll\n      framesPath=\"/immersive/launch\"\n      viewportProps={{ position: 'sticky', top: 0 }}\n      mediaProps={{ position: 'absolute', inset: 0 }}\n      config={controls.config}\n      overlay={\n        <ImmersiveLayer>\n          <SceneStatus />\n        </ImmersiveLayer>\n      }\n    >\n      <section>{/* story panels */}</section>\n    </ImmersiveScroll>\n  );\n}`
+    code: `'use client';\n\nimport {\n  ImmersiveLayer,\n  ImmersiveScroll,\n  useImmersiveConfigControls,\n  useImmersiveFrame,\n  useImmersiveProgress\n} from 'immersive-scroll';\n\nfunction SceneStatus() {\n  const frame = useImmersiveFrame();\n  const { progress } = useImmersiveProgress();\n\n  return (\n    <div>\n      <span>Progress {Math.round(progress * 100)}%</span>\n      <span>Frame {frame.currentFrame + 1}</span>\n    </div>\n  );\n}\n\nexport function ProductHero() {\n  const controls = useImmersiveConfigControls({\n    initialConfig: {\n      visual: { objectFit: 'cover' },\n      scrollbar: { enabled: true, visibilityMode: 'manual' }\n    }\n  });\n\n  return (\n    <ImmersiveScroll\n      framesPath=\"/immersive/launch\"\n      config={controls.config}\n      overlay={\n        <ImmersiveLayer>\n          <SceneStatus />\n        </ImmersiveLayer>\n      }\n    >\n      <section>{/* story panels */}</section>\n    </ImmersiveScroll>\n  );\n}`
   },
   {
     eyebrow: 'Asset prep',
@@ -118,7 +118,9 @@ export const componentReferenceSections: readonly ReferenceSection[] = [
         name: 'viewportProps / mediaProps',
         type: 'ImmersiveViewportProps / ImmersiveMediaProps',
         description:
-          'Placement and style props for the pinned viewport wrapper and the media surface itself. Use these to switch between sticky, fixed, absolute, or custom offsets without editing internal markup.'
+          'Placement and style props for the pinned viewport wrapper and the media surface itself. The default pinned scene is a fixed inset-0 viewport with an absolute inset-0 media layer, and these props let you override that for sticky, absolute, offset, or higher-z-index layouts.',
+        defaultValue:
+          'Pinned scenes: fixed inset-0 viewport + absolute inset-0 media'
       },
       {
         name: 'children',

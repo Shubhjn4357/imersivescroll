@@ -57,6 +57,8 @@ export function StoryScene() {
 ## Notes
 
 - The component tree is client-side and expects a public frame folder or explicit manifest path.
+- Pinned scenes default to a fixed full-screen viewport with a full-bleed media layer.
 - Scrollbar placement and interactivity can be controlled through config or `scrollbarProps`.
+- Use `viewportProps` or `mediaProps` only when a route needs sticky, absolute, offset, or custom `z-index` placement.
 - `useImmersiveConfigControls()` is useful for toolbars, preview knobs, and any route-level UI that needs to patch scene config without hand-writing nested state.
 - For Next.js-specific client wrappers, use `@immersive-scroll/next`.

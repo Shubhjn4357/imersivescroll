@@ -90,9 +90,9 @@ export function DocsPage() {
             `immersive-scroll` is a scene wrapper for frame-sequence
             storytelling. One package now ships the React runtime, the framework
             adapters, the config-control hook, and the CLI you use to generate
-            frame assets. It pins a viewport, renders frames on a canvas, and
-            exposes scene state through React hooks so overlays and supporting
-            UI stay predictable.
+            frame assets. It pins a fixed full-screen viewport by default,
+            renders frames on a canvas, and exposes scene state through React
+            hooks so overlays and supporting UI stay predictable.
           </p>
         </div>
 
@@ -167,9 +167,9 @@ export function DocsPage() {
           </li>
           <li>
             Mount <code>{'<ImmersiveScroll />'}</code> with{' '}
-            <code>framesPath</code>, placement props like{' '}
-            <code>viewportProps</code> or <code>mediaProps</code>, and only the
-            config you actually need.
+            <code>framesPath</code> and only the config you actually need. Reach
+            for <code>viewportProps</code> or <code>mediaProps</code> only when
+            you want something other than the default fixed full-screen scene.
           </li>
           <li>
             Add overlay UI through <code>{'<ImmersiveLayer />'}</code> and read

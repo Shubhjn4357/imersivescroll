@@ -76,10 +76,10 @@ const thumbColorOptions = ['#8de1ff', '#ffd36e', '#7cf7c0', '#f4a8ff'] as const;
 
 const previewPanels: readonly PreviewPanel[] = [
   {
-    eyebrow: 'Sticky viewport',
+    eyebrow: 'Pinned viewport',
     title: 'The scene stays pinned while the story moves through it.',
     description:
-      'Scroll inside this preview, not the page. The content drives progress while the frame surface remains fixed in place.',
+      'Scroll inside this preview, not the page. The content drives progress while the frame surface remains pinned in place.',
     align: 'left',
     details: ['Contained scroll', 'Pinned viewport', 'Frame scrub']
   },
@@ -498,8 +498,6 @@ export function PlaygroundWorkbench() {
       JSON.stringify(
         {
           framesPath: defaultSceneFramesPath,
-          viewportProps: { position: 'sticky', top: 0 },
-          mediaProps: { position: 'absolute', inset: 0 },
           config: workbenchConfig,
           preview: {
             scrollScreens: Number(scrollScreens.toFixed(1))
@@ -536,7 +534,7 @@ export function PlaygroundWorkbench() {
             <div className="docs-inline-list">
               <span className="docs-chip">Hook-driven controls</span>
               <span className="docs-chip">Shared /immersive/scene</span>
-              <span className="docs-chip">viewportProps + mediaProps</span>
+              <span className="docs-chip">Default fixed viewport</span>
             </div>
           </div>
           <div className="info-pill-row">
