@@ -10,7 +10,11 @@ import { createEventBus } from '../events/createEventBus';
 import { calculateFrameIndexFromProgress } from '../frame/calculateFrameIndex';
 import { createFrameStore } from '../frame/createFrameStore';
 import { resolveFrameUrl } from '../frame/frameManifest';
-import { loadFrameImage } from '../frame/loadFrameImage';
+import {
+  evictFrameImage,
+  loadFrameImage,
+  primeFrameImage
+} from '../frame/loadFrameImage';
 import { loadManifest } from '../manifest/loadManifest';
 import { resolveManifestPath } from '../manifest/resolveManifestPath';
 import { createPluginManager } from '../plugins/createPluginManager';
@@ -45,6 +49,7 @@ export function createImmersiveEngine(
   const viewportObserver = createViewportObserver(options.container ?? null);
   const resizeController = createResizeController(options.container ?? null);
   const progressController = createProgressController();
+  const loadedFrameIndexes = new Set<number>();
   let lastRenderRequest = 0;
   let destroyed = false;
 
@@ -78,7 +83,9 @@ export function createImmersiveEngine(
   });
 
   const setManifest = async (manifest: ImmersiveFrameManifest | null) => {
+    loadedFrameIndexes.clear();
     frameStore.setManifest(manifest);
+    frameStore.setLoadedFrames([]);
     if (!manifest) {
       return;
     }
@@ -86,6 +93,91 @@ export function createImmersiveEngine(
     eventBus.emit('ready', { manifest });
     config.events.onReady?.({ manifestPath: resolveManifestPath(config) });
     await pluginManager.onReady();
+  };
+
+  const syncLoadedFrames = () => {
+    frameStore.setLoadedFrames(Array.from(loadedFrameIndexes));
+  };
+
+  const markFrameLoaded = (frameIndex: number) => {
+    if (loadedFrameIndexes.has(frameIndex)) {
+      return;
+    }
+
+    loadedFrameIndexes.add(frameIndex);
+    syncLoadedFrames();
+  };
+
+  const pruneLoadedFrames = (
+    manifest: ImmersiveFrameManifest,
+    frameIndex: number
+  ) => {
+    const unloadDistance = Math.max(
+      config.unloadDistance,
+      config.preloadCount + 1
+    );
+    let hasChanges = false;
+
+    loadedFrameIndexes.forEach((loadedFrameIndex) => {
+      if (Math.abs(loadedFrameIndex - frameIndex) <= unloadDistance) {
+        return;
+      }
+
+      loadedFrameIndexes.delete(loadedFrameIndex);
+      evictFrameImage(resolveFrameUrl(manifest, loadedFrameIndex));
+      hasChanges = true;
+    });
+
+    if (hasChanges) {
+      syncLoadedFrames();
+    }
+  };
+
+  const createFrameWindow = (
+    frameIndex: number,
+    totalFrames: number,
+    preloadCount: number
+  ) => {
+    const frameWindow = [frameIndex];
+
+    for (let offset = 1; offset <= preloadCount; offset += 1) {
+      const nextForwardFrame = frameIndex + offset;
+      const nextBackwardFrame = frameIndex - offset;
+
+      if (nextForwardFrame < totalFrames) {
+        frameWindow.push(nextForwardFrame);
+      }
+
+      if (nextBackwardFrame >= 0) {
+        frameWindow.push(nextBackwardFrame);
+      }
+    }
+
+    return frameWindow;
+  };
+
+  const preloadFrameWindow = async (
+    manifest: ImmersiveFrameManifest,
+    frameIndex: number
+  ) => {
+    pruneLoadedFrames(manifest, frameIndex);
+
+    const frameWindow = createFrameWindow(
+      frameIndex,
+      manifest.frameCount,
+      Math.max(config.preloadCount, 0)
+    );
+
+    await Promise.allSettled(
+      frameWindow.map(async (windowFrameIndex) => {
+        const frameUrl = resolveFrameUrl(manifest, windowFrameIndex);
+
+        await primeFrameImage(frameUrl);
+        if (!destroyed) {
+          markFrameLoaded(windowFrameIndex);
+        }
+      })
+    );
   };
 
   const renderCurrentFrame = async () => {
@@ -102,6 +194,7 @@ export function createImmersiveEngine(
       if (destroyed || renderRequest !== lastRenderRequest) {
         return;
       }
+      markFrameLoaded(frameIndex);
       renderer.render({ frameIndex, image });
     } catch (error) {
       const resolvedError = toError(error);
@@ -152,10 +245,14 @@ export function createImmersiveEngine(
       );
 
       frameStore.setCurrentFrame(frameIndex);
+      const manifest = frameStore.getState().manifest;
       config.events.onProgress?.(normalized);
       config.events.onFrameChange?.(frameIndex);
       eventBus.emit('frameChange', { frameIndex, totalFrames });
       await pluginManager.onFrameChange(frameIndex);
+      if (manifest) {
+        void preloadFrameWindow(manifest, frameIndex);
+      }
       await renderCurrentFrame();
     },
     updateScroll(scrollY: number, velocity = 0) {

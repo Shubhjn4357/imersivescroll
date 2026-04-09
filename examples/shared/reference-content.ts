@@ -348,14 +348,14 @@ export const configReferenceSections: readonly ReferenceSection[] = [
         name: 'smooth',
         type: 'boolean',
         description:
-          'Signals that the scene should use smoothed scroll behavior when a renderer supports it.',
+          'Keeps frame progress on a requestAnimationFrame-driven smoothing loop instead of jumping directly to every raw scroll delta.',
         defaultValue: 'true'
       },
       {
         name: 'lerp / duration',
         type: 'number',
         description:
-          'Fine-tunes interpolation intensity and smoothing duration when the scroll system is extended.',
+          'Controls how aggressively progress catches the target scroll position and how long the scene is allowed to ease into the next frame window.',
         defaultValue: '0.1 / 1.2'
       },
       {
@@ -540,13 +540,15 @@ export const configReferenceSections: readonly ReferenceSection[] = [
       {
         name: 'enabled',
         type: 'boolean',
-        description: 'Shows the packaged debug panel when true.',
+        description:
+          'Shows the packaged debug panel above the scene chrome when true.',
         defaultValue: 'false'
       },
       {
         name: 'showFrameIndex / showProgress / showVelocity / showManifestStatus',
         type: 'boolean',
-        description: 'Toggles individual fields in the packaged debug HUD.',
+        description:
+          'Toggles individual fields in the packaged debug HUD. If you enable the panel without setting any field flags, the runtime falls back to showing the full set.',
         defaultValue: 'false'
       }
     ]

@@ -13,6 +13,7 @@ import {
   defaultSceneManifestPath,
   landingSource
 } from '../landing-content';
+import { CodeBlock } from './CodeBlock';
 
 interface WorkbenchVisualState {
   overlayOpacity: number;
@@ -28,6 +29,12 @@ interface WorkbenchScrollbarState {
   trackOpacity: number;
   thumbOpacity: number;
   thumbColor: string;
+}
+
+interface WorkbenchScrollState {
+  smooth: boolean;
+  lerp: number;
+  duration: number;
 }
 
 interface ViewportSize {
@@ -59,14 +66,33 @@ const defaultWorkbenchScrollbarState: WorkbenchScrollbarState = {
   thumbColor: '#8de1ff'
 };
 
+const defaultWorkbenchScrollState: WorkbenchScrollState = {
+  smooth: true,
+  lerp: 0.18,
+  duration: 0.55
+};
+
 const defaultWorkbenchConfig = {
   visual: defaultWorkbenchVisualState,
+  scroll: {
+    enabled: true,
+    smooth: defaultWorkbenchScrollState.smooth,
+    lerp: defaultWorkbenchScrollState.lerp,
+    duration: defaultWorkbenchScrollState.duration
+  },
   scrollbar: {
     enabled: defaultWorkbenchScrollbarState.showScrollbar,
     visibilityMode: 'manual',
     trackOpacity: defaultWorkbenchScrollbarState.trackOpacity,
     thumbOpacity: defaultWorkbenchScrollbarState.thumbOpacity,
     thumbColor: defaultWorkbenchScrollbarState.thumbColor
+  },
+  debug: {
+    enabled: false,
+    showFrameIndex: true,
+    showProgress: true,
+    showVelocity: true,
+    showManifestStatus: true
   }
 } satisfies PartialImmersiveConfig;
 
@@ -142,6 +168,28 @@ function resolveFrameUrl(
 
 function buildCanvasFilter(controls: WorkbenchVisualState) {
   return `brightness(${controls.brightness}) contrast(${controls.contrast}) saturate(${controls.saturate}) blur(${controls.blur}px)`;
+}
+
+function resolvePreviewSmoothingAmount(
+  deltaTimeMs: number,
+  lerpAmount: number,
+  durationSeconds: number
+) {
+  const normalizedLerp = clamp(lerpAmount, 0.01, 1);
+  const normalizedDuration = Math.max(durationSeconds, 0.001);
+  const frameRateAdjustedAmount =
+    1 - Math.pow(1 - normalizedLerp, deltaTimeMs / 16);
+  const durationAdjustedAmount = clamp(
+    deltaTimeMs / (normalizedDuration * 1000),
+    0.01,
+    1
+  );
+
+  return clamp(
+    Math.max(frameRateAdjustedAmount, durationAdjustedAmount),
+    0.01,
+    1
+  );
 }
 
 function drawFrameToCanvas(
@@ -272,18 +320,35 @@ export function PlaygroundWorkbench() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
+  const progressRef = useRef(0);
+  const lastScrollTopRef = useRef(0);
+  const lastScrollTimestampRef = useRef(0);
+  const velocityTimeoutRef = useRef(0);
   const sceneControls = useImmersiveConfigControls({
     initialConfig: defaultWorkbenchConfig
   });
   const [manifest, setManifest] = useState<ImmersiveFrameManifest | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [targetProgress, setTargetProgress] = useState(0);
+  const [scrollVelocity, setScrollVelocity] = useState(0);
   const [loadedFrameCount, setLoadedFrameCount] = useState(0);
   const [viewportSize, setViewportSize] = useState<ViewportSize>({
     width: 0,
     height: 0
   });
   const [scrollScreens, setScrollScreens] = useState(defaultScrollScreens);
+
+  useEffect(() => {
+    progressRef.current = progress;
+  }, [progress]);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(velocityTimeoutRef.current);
+    },
+    []
+  );
 
   useEffect(() => {
     let active = true;
@@ -424,19 +489,105 @@ export function PlaygroundWorkbench() {
     [sceneControls.config.scrollbar]
   );
 
+  const scrollControls = useMemo<WorkbenchScrollState>(
+    () => ({
+      smooth:
+        sceneControls.config.scroll?.smooth ??
+        defaultWorkbenchScrollState.smooth,
+      lerp:
+        sceneControls.config.scroll?.lerp ?? defaultWorkbenchScrollState.lerp,
+      duration:
+        sceneControls.config.scroll?.duration ??
+        defaultWorkbenchScrollState.duration
+    }),
+    [sceneControls.config.scroll]
+  );
+  const debugEnabled = sceneControls.config.debug?.enabled ?? false;
+
   const workbenchConfig = useMemo<PartialImmersiveConfig>(
     () => ({
       visual: visualControls,
+      scroll: {
+        enabled: true,
+        smooth: scrollControls.smooth,
+        lerp: scrollControls.lerp,
+        duration: scrollControls.duration
+      },
       scrollbar: {
         enabled: scrollbarControls.showScrollbar,
         visibilityMode: 'manual',
         trackOpacity: scrollbarControls.trackOpacity,
         thumbOpacity: scrollbarControls.thumbOpacity,
         thumbColor: scrollbarControls.thumbColor
+      },
+      debug: {
+        enabled: debugEnabled,
+        showFrameIndex: true,
+        showProgress: true,
+        showVelocity: true,
+        showManifestStatus: true
       }
     }),
-    [scrollbarControls, visualControls]
+    [debugEnabled, scrollControls, scrollbarControls, visualControls]
   );
+
+  useEffect(() => {
+    if (!scrollControls.smooth) {
+      progressRef.current = targetProgress;
+      setProgress(targetProgress);
+      return;
+    }
+
+    let animationFrameId = 0;
+    let lastTimestamp = performance.now();
+
+    const animateProgress = (timestamp: number) => {
+      const deltaTime = Math.max(timestamp - lastTimestamp, 16);
+      const currentProgress = progressRef.current;
+      const progressGap = targetProgress - currentProgress;
+
+      lastTimestamp = timestamp;
+
+      if (Math.abs(progressGap) <= 0.0005) {
+        if (currentProgress !== targetProgress) {
+          progressRef.current = targetProgress;
+          setProgress(targetProgress);
+        }
+        return;
+      }
+
+      const nextProgress = clamp(
+        currentProgress +
+          progressGap *
+            resolvePreviewSmoothingAmount(
+              deltaTime,
+              scrollControls.lerp,
+              scrollControls.duration
+            ),
+        0,
+        1
+      );
+      const resolvedProgress =
+        Math.abs(targetProgress - nextProgress) <= 0.0005
+          ? targetProgress
+          : nextProgress;
+
+      progressRef.current = resolvedProgress;
+      setProgress(resolvedProgress);
+      animationFrameId = window.requestAnimationFrame(animateProgress);
+    };
+
+    animationFrameId = window.requestAnimationFrame(animateProgress);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [
+    scrollControls.duration,
+    scrollControls.lerp,
+    scrollControls.smooth,
+    targetProgress
+  ]);
 
   const currentFrame = useMemo(() => {
     if (!manifest) {
@@ -512,7 +663,28 @@ export function PlaygroundWorkbench() {
   const handleScroll = (event: UIEvent<HTMLDivElement>) => {
     const element = event.currentTarget;
     const maxScroll = Math.max(element.scrollHeight - element.clientHeight, 1);
-    setProgress(element.scrollTop / maxScroll);
+    const nextTargetProgress = element.scrollTop / maxScroll;
+    const nextTimestamp = performance.now();
+    const deltaScroll = element.scrollTop - lastScrollTopRef.current;
+    const deltaTime = Math.max(
+      nextTimestamp - lastScrollTimestampRef.current,
+      16
+    );
+
+    lastScrollTopRef.current = element.scrollTop;
+    lastScrollTimestampRef.current = nextTimestamp;
+
+    setTargetProgress(nextTargetProgress);
+    setScrollVelocity(deltaScroll / deltaTime);
+    window.clearTimeout(velocityTimeoutRef.current);
+    velocityTimeoutRef.current = window.setTimeout(() => {
+      setScrollVelocity(0);
+    }, 120);
+
+    if (!scrollControls.smooth) {
+      progressRef.current = nextTargetProgress;
+      setProgress(nextTargetProgress);
+    }
   };
 
   return (
@@ -535,6 +707,9 @@ export function PlaygroundWorkbench() {
               <span className="docs-chip">Hook-driven controls</span>
               <span className="docs-chip">Shared /immersive/scene</span>
               <span className="docs-chip">Default fixed viewport</span>
+              <span className="docs-chip">
+                {scrollControls.smooth ? 'Smooth scrub on' : 'Smooth scrub off'}
+              </span>
             </div>
           </div>
           <div className="info-pill-row">
@@ -583,6 +758,20 @@ export function PlaygroundWorkbench() {
               ) : null}
 
               <div className="playground-preview-hud">
+                {debugEnabled ? (
+                  <div className="playground-preview-debug">
+                    <strong>Debug HUD</strong>
+                    <span>progress {progress.toFixed(3)}</span>
+                    <span>velocity {scrollVelocity.toFixed(3)}</span>
+                    <span>
+                      frame {manifest ? currentFrame + 1 : 0}/
+                      {manifest?.frameCount ?? 0}
+                    </span>
+                    <span>
+                      loaded {loadedFrameCount}/{manifest?.frameCount ?? 0}
+                    </span>
+                  </div>
+                ) : null}
                 <div className="landing-status landing-status--playground">
                   <strong>Workbench</strong>
                   <span>Frame scrub inside a bounded preview</span>
@@ -657,6 +846,13 @@ export function PlaygroundWorkbench() {
             onClick={() => {
               sceneControls.resetConfig();
               setScrollScreens(defaultScrollScreens);
+              progressRef.current = 0;
+              lastScrollTopRef.current = 0;
+              lastScrollTimestampRef.current = performance.now();
+              setProgress(0);
+              setTargetProgress(0);
+              setScrollVelocity(0);
+              scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' });
             }}
           >
             Reset controls
@@ -789,7 +985,44 @@ export function PlaygroundWorkbench() {
                 ))}
               </div>
             </div>
+          </div>
 
+          <div className="playground-control-card">
+            <p className="eyebrow">Scroll + debug</p>
+            <ToggleField
+              label="Smooth scrub"
+              checked={scrollControls.smooth}
+              onChange={(nextValue) =>
+                sceneControls.updateScroll({ smooth: nextValue })
+              }
+            />
+            <RangeField
+              label="Lerp"
+              value={scrollControls.lerp}
+              minimum={0.04}
+              maximum={0.45}
+              step={0.01}
+              onChange={(nextValue) =>
+                sceneControls.updateScroll({ lerp: nextValue })
+              }
+            />
+            <RangeField
+              label="Duration"
+              value={scrollControls.duration}
+              minimum={0.15}
+              maximum={1.4}
+              step={0.05}
+              onChange={(nextValue) =>
+                sceneControls.updateScroll({ duration: nextValue })
+              }
+            />
+            <ToggleField
+              label="Show debug HUD"
+              checked={debugEnabled}
+              onChange={(nextValue) =>
+                sceneControls.updateDebug({ enabled: nextValue })
+              }
+            />
             <RangeField
               label="Scroll span"
               value={scrollScreens}
@@ -805,12 +1038,11 @@ export function PlaygroundWorkbench() {
             <h3>Live configuration snapshot</h3>
             <p>
               Copy this shape into the package component after tuning the scene.
-              The preview-only scroll span stays separate from the shipped
+              The preview-only scroll span stays separate, while smooth scrub,
+              debug HUD, and scrollbar controls map directly to the shipped
               runtime config.
             </p>
-            <pre className="code-block">
-              <code>{liveConfig}</code>
-            </pre>
+            <CodeBlock code={liveConfig} language="json" />
             <div className="docs-inline-list">
               <span className="docs-chip docs-chip--muted">
                 pnpm extract &quot;./video.mp4&quot;
@@ -820,6 +1052,9 @@ export function PlaygroundWorkbench() {
               </span>
               <span className="docs-chip docs-chip--muted">
                 Shared WebP frames
+              </span>
+              <span className="docs-chip docs-chip--muted">
+                scroll.smooth / lerp / duration
               </span>
             </div>
           </article>

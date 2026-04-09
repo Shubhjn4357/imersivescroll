@@ -1,6 +1,7 @@
 export { createImmersiveEngine } from './engine/createImmersiveEngine';
 export { createFrameStore } from './frame/createFrameStore';
 export { createScrollStore } from './scroll/createScrollStore';
+export { createWindowScrollSync } from './scroll/createWindowScrollSync';
 export { createPluginManager } from './plugins/createPluginManager';
 export { validateFrameManifest } from './manifest/manifestContract';
 export { validateFrameDirectoryContract } from './manifest/manifestIntegrity';
@@ -13,6 +14,11 @@ export { createProgressController } from './progress/createProgressController';
 export { normalizeProgress, segmentProgress } from './progress/progressMath';
 export { createViewportObserver } from './viewport/createViewportObserver';
 export { createResizeController } from './resize/createResizeController';
+export {
+  getImmersiveScrollMetrics,
+  resolveProgressFromScrollY,
+  resolveScrollYFromProgress
+} from './scroll/scrollMetrics';
 export { getTriggerActivation } from './triggers/triggerActivation';
 export type { TriggerActivationState } from './triggers/triggerActivation';
 export * from '@immersive-scroll/shared';

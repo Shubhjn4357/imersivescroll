@@ -6,6 +6,7 @@ import {
   playgroundStackCards,
   nextDemoNavigationLinks
 } from '../landing-content';
+import { CodeBlock } from './CodeBlock';
 import { DocsFrame, type DocsSidebarGroup } from './DocsFrame';
 import { PlaygroundWorkbench } from './PlaygroundWorkbench';
 
@@ -35,6 +36,7 @@ export function PlaygroundPage() {
         'Contained preview',
         'Hook-driven controls',
         'Config snapshot',
+        'Copyable code',
         'Mobile-first shell'
       ]}
       description="The playground is the package QA surface. It keeps the scene inside a bounded preview, patches the runtime through the public controls hook, and collapses into a mobile-first layout before expanding into a larger desktop workbench."
@@ -118,16 +120,22 @@ export function PlaygroundPage() {
             The bottom dock maps directly to
             <code> useImmersiveConfigControls() </code>
             plus the preview-only scroll span. Tune the values here, then paste
-            the config snapshot into a real route.
+            the config snapshot into a real route. The workbench now also
+            exposes the shipped smooth-scrub and debug-HUD controls so QA can
+            validate motion feel before leaving the page.
           </p>
         </div>
 
         <div className="docs-inline-list">
           <span className="docs-chip">overlayOpacity</span>
+          <span className="docs-chip">scroll.smooth</span>
+          <span className="docs-chip">scroll.lerp</span>
+          <span className="docs-chip">scroll.duration</span>
           <span className="docs-chip">brightness</span>
           <span className="docs-chip">contrast</span>
           <span className="docs-chip">saturate</span>
           <span className="docs-chip">objectFit</span>
+          <span className="docs-chip">debug HUD</span>
           <span className="docs-chip">scrollbar thumbColor</span>
           <span className="docs-chip">scroll span</span>
         </div>
@@ -150,9 +158,7 @@ export function PlaygroundPage() {
                 <h3>{snippet.title}</h3>
                 <p>{snippet.description}</p>
               </div>
-              <pre className="code-block">
-                <code>{snippet.code}</code>
-              </pre>
+              <CodeBlock code={snippet.code} language={snippet.language} />
             </article>
           ))}
         </div>

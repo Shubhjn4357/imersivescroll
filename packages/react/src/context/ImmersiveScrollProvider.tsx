@@ -1,4 +1,5 @@
 import {
+  createWindowScrollSync,
   createImmersiveEngine,
   DEFAULT_IMMERSIVE_CONFIG,
   normalizeImmersiveConfig
@@ -123,6 +124,11 @@ export function ImmersiveScrollProvider({
       }),
     [config, framesPath, manifestPath, video]
   );
+  const normalizedConfigRef = useRef(normalizedConfig);
+
+  useEffect(() => {
+    normalizedConfigRef.current = normalizedConfig;
+  }, [normalizedConfig]);
 
   useEffect(() => {
     if (
@@ -158,54 +164,30 @@ export function ImmersiveScrollProvider({
 
     setEngine(nextEngine);
     void nextEngine.init();
-
-    let animationFrameId = 0;
-    let scrollIdleTimeout = 0;
-    let lastScrollY = window.scrollY;
-    let lastTimestamp = performance.now();
-
-    const syncScrollState = () => {
-      animationFrameId = 0;
-
-      const currentScrollY = window.scrollY;
-      const currentTimestamp = performance.now();
-      const progress = resolveProgressFromScrollY(
-        currentScrollY,
-        containerRef.current
-      );
-      const deltaY = currentScrollY - lastScrollY;
-      const deltaTime = Math.max(currentTimestamp - lastTimestamp, 16);
-      const velocity = deltaY / deltaTime;
-
-      lastScrollY = currentScrollY;
-      lastTimestamp = currentTimestamp;
-
-      void nextEngine.updateProgress(progress);
-      nextEngine.updateScroll(currentScrollY, velocity);
-
-      window.clearTimeout(scrollIdleTimeout);
-      scrollIdleTimeout = window.setTimeout(() => {
-        nextEngine.endScroll(window.scrollY);
-      }, 96);
-    };
-
-    const queueScrollSync = () => {
-      if (animationFrameId !== 0) {
-        return;
+    const scrollSync = createWindowScrollSync({
+      callbacks: {
+        updateProgress(progress) {
+          return nextEngine.updateProgress(progress);
+        },
+        updateScroll(scrollY, velocity) {
+          nextEngine.updateScroll(scrollY, velocity);
+        },
+        endScroll(scrollY) {
+          nextEngine.endScroll(scrollY);
+        }
+      },
+      resolveProgress(scrollY) {
+        return resolveProgressFromScrollY(scrollY, containerRef.current);
+      },
+      getScrollConfig() {
+        return normalizedConfigRef.current.scroll;
       }
+    });
 
-      animationFrameId = window.requestAnimationFrame(syncScrollState);
-    };
-
-    window.addEventListener('scroll', queueScrollSync, { passive: true });
-    window.addEventListener('resize', queueScrollSync);
-    queueScrollSync();
+    scrollSync.syncNow();
 
     return () => {
-      window.removeEventListener('scroll', queueScrollSync);
-      window.removeEventListener('resize', queueScrollSync);
-      window.cancelAnimationFrame(animationFrameId);
-      window.clearTimeout(scrollIdleTimeout);
+      scrollSync.destroy();
       unsubscribeFrame();
       unsubscribeScroll();
       void nextEngine.destroy();

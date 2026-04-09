@@ -11,6 +11,7 @@ export interface FrameStore {
   subscribe(listener: Subscriber<FrameStoreState>): Unsubscribe;
   setManifest(manifest: ImmersiveFrameManifest | null): void;
   setCurrentFrame(frameIndex: number): void;
+  setLoadedFrames(frameIndexes: number[]): void;
   setError(error: Error | null): void;
   setReady(ready: boolean): void;
 }
@@ -56,6 +57,15 @@ export function createFrameStore(): FrameStore {
         frameUrl: state.manifest
           ? resolveFrameUrl(state.manifest, frameIndex)
           : null
+      };
+      notify();
+    },
+    setLoadedFrames(frameIndexes) {
+      state = {
+        ...state,
+        loadedFrames: [...new Set(frameIndexes)].sort(
+          (left, right) => left - right
+        )
       };
       notify();
     },

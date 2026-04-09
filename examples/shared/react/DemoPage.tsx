@@ -17,6 +17,7 @@ import {
   nextDemoNavigationLinks
 } from '../landing-content';
 import { docsQuickstartSnippets } from '../reference-content';
+import { CodeBlock } from './CodeBlock';
 import { DocsFrame, type DocsSidebarGroup } from './DocsFrame';
 import { SceneToolbarButton } from './SceneToolbarButton';
 
@@ -249,9 +250,7 @@ export function DemoPage() {
                 <h3>{snippet.title}</h3>
                 <p>{snippet.description}</p>
               </div>
-              <pre className="code-block">
-                <code>{snippet.code}</code>
-              </pre>
+              <CodeBlock code={snippet.code} language={snippet.language} />
             </article>
           ))}
         </div>
@@ -360,9 +359,10 @@ export function DemoPage() {
           </p>
         </div>
 
-        <pre className="code-block">
-          <code>{`const sceneControls = useImmersiveConfigControls({\n  initialConfig: {\n    debug: { enabled: false },\n    scrollbar: { enabled: true, positionMode: 'absolute' }\n  }\n});\n\nconst showDebug = sceneControls.config.debug?.enabled ?? false;\nconst showScrollbar = sceneControls.config.scrollbar?.enabled ?? true;\nconst scrollbarPositionMode =\n  sceneControls.config.scrollbar?.positionMode === 'fixed'\n    ? 'fixed'\n    : 'absolute';\n\n<ImmersiveScroll\n  framesPath="/immersive/scene"\n  config={{\n    debug: {\n      ...defaultConfig.debug,\n      ...sceneControls.config.debug\n    },\n    scrollbar: {\n      ...defaultConfig.scrollbar,\n      ...sceneControls.config.scrollbar\n    }\n  }}\n  scrollbarProps={{\n    visible: showScrollbar,\n    positionMode: scrollbarPositionMode,\n    ...(scrollbarPositionMode === 'absolute'\n      ? { top: 18, right: 18, bottom: 18 }\n      : { style: fixedStyle })\n  }}\n/>`}</code>
-        </pre>
+        <CodeBlock
+          code={`const sceneControls = useImmersiveConfigControls({\n  initialConfig: {\n    debug: { enabled: false },\n    scrollbar: { enabled: true, positionMode: 'absolute' }\n  }\n});\n\nconst showDebug = sceneControls.config.debug?.enabled ?? false;\nconst showScrollbar = sceneControls.config.scrollbar?.enabled ?? true;\nconst scrollbarPositionMode =\n  sceneControls.config.scrollbar?.positionMode === 'fixed'\n    ? 'fixed'\n    : 'absolute';\n\n<ImmersiveScroll\n  framesPath="/immersive/scene"\n  config={{\n    debug: {\n      ...defaultConfig.debug,\n      ...sceneControls.config.debug\n    },\n    scrollbar: {\n      ...defaultConfig.scrollbar,\n      ...sceneControls.config.scrollbar\n    }\n  }}\n  scrollbarProps={{\n    visible: showScrollbar,\n    positionMode: scrollbarPositionMode,\n    ...(scrollbarPositionMode === 'absolute'\n      ? { top: 18, right: 18, bottom: 18 }\n      : { style: fixedStyle })\n  }}\n/>`}
+          language="tsx"
+        />
       </section>
     </DocsFrame>
   );

@@ -1,5 +1,17 @@
 const frameImageCache = new Map<string, Promise<HTMLImageElement>>();
 
+export function hasFrameImage(frameUrl: string) {
+  return frameImageCache.has(frameUrl);
+}
+
+export function evictFrameImage(frameUrl: string) {
+  frameImageCache.delete(frameUrl);
+}
+
+export function primeFrameImage(frameUrl: string) {
+  return loadFrameImage(frameUrl);
+}
+
 export async function loadFrameImage(
   frameUrl: string
 ): Promise<HTMLImageElement> {

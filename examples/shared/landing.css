@@ -684,6 +684,59 @@ code {
   line-height: 1.7;
 }
 
+.code-block-shell {
+  display: grid;
+  gap: 0;
+}
+
+.code-block__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 0 10px;
+}
+
+.code-block__language,
+.code-block__copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card-subtle);
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.code-block__language {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.code-block__copy {
+  color: var(--foreground);
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.code-block__copy:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-strong);
+}
+
+.code-block__copy[data-state='copied'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
 .code-block {
   overflow-x: auto;
   max-width: 100%;
@@ -759,6 +812,36 @@ code {
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+.playground-preview-debug {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: grid;
+  gap: 4px;
+  min-width: 160px;
+  max-width: min(220px, calc(100% - 28px));
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--background) 84%, transparent);
+  color: var(--foreground);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.playground-preview-debug strong {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.playground-preview-debug span {
+  color: var(--muted);
+  font-size: 0.82rem;
 }
 
 .playground-preview-scrollbar {
@@ -1006,6 +1089,12 @@ code {
     right: 18px;
     bottom: 18px;
     width: 18px;
+  }
+
+  .playground-preview-debug {
+    top: 18px;
+    right: 48px;
+    max-width: 240px;
   }
 
   .playground-preview-scrollbar__track,

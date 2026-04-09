@@ -8,6 +8,7 @@ import {
   hookReferenceItems
 } from '../reference-content';
 import { nextDemoNavigationLinks } from '../landing-content';
+import { CodeBlock } from './CodeBlock';
 import { DocsFrame, type DocsSidebarGroup } from './DocsFrame';
 
 const docsSidebarGroups: readonly DocsSidebarGroup[] = [
@@ -76,7 +77,7 @@ export function DocsPage() {
   return (
     <DocsFrame
       activeHref="/docs"
-      badges={['Quick start', 'Props', 'Hooks', 'CLI', 'Responsive shell']}
+      badges={['Quick start', 'Props', 'Hooks', 'CLI', 'Copyable snippets']}
       description="The docs are organized like a component reference, not a marketing page. Start with the single-package install, move through the scene lifecycle, then use the hook and prop reference to shape a responsive route shell."
       eyebrow="Documentation"
       navigationLinks={nextDemoNavigationLinks}
@@ -130,7 +131,9 @@ export function DocsPage() {
           <p>
             Add the public package, prepare the asset directory, and keep the
             first render simple before you layer in motion, custom placement, or
-            decorative chrome.
+            decorative chrome. Every code sample now has an in-page copy action
+            so the docs behave like a reference surface instead of a static
+            article.
           </p>
         </div>
 
@@ -142,9 +145,7 @@ export function DocsPage() {
                 <h3>{snippet.title}</h3>
                 <p>{snippet.description}</p>
               </div>
-              <pre className="code-block">
-                <code>{snippet.code}</code>
-              </pre>
+              <CodeBlock code={snippet.code} language={snippet.language} />
             </article>
           ))}
         </div>
@@ -229,9 +230,7 @@ export function DocsPage() {
                   {hook.returns}
                 </span>
               </div>
-              <pre className="code-block">
-                <code>{hook.usage}</code>
-              </pre>
+              <CodeBlock code={hook.usage} language="tsx" />
               <div className="docs-inline-list">
                 {hook.notes.map((note) => (
                   <span className="docs-chip docs-chip--muted" key={note}>
@@ -303,8 +302,8 @@ export function DocsPage() {
           <h2>Reliability</h2>
           <p>
             Most production bugs come from asset volume, SSR boundaries,
-            viewport placement drift, or interactive chrome that was styled
-            outside the config system.
+            viewport placement drift, unsmoothed progress mapping, or
+            interactive chrome that was styled outside the config system.
           </p>
         </div>
 

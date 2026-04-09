@@ -23,6 +23,7 @@ import {
   type DestinationCard,
   type SiteLink
 } from '../landing-content';
+import { CodeBlock } from './CodeBlock';
 import { SceneToolbarButton } from './SceneToolbarButton';
 import { SiteChrome } from './SiteChrome';
 
@@ -126,9 +127,10 @@ export function ImmersiveLanding({
                 <span className="docs-chip">Quick start</span>
                 <h3>Install once, then extract once</h3>
               </div>
-              <pre className="code-block">
-                <code>{`pnpm add immersive-scroll gsap\npnpm extract "./examples/assets/wildrobot.mp4"`}</code>
-              </pre>
+              <CodeBlock
+                code={`pnpm add immersive-scroll gsap\npnpm extract "./examples/assets/wildrobot.mp4"`}
+                language="bash"
+              />
             </article>
           </aside>
         </section>
