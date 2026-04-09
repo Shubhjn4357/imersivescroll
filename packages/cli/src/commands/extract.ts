@@ -16,7 +16,8 @@ export async function runExtractFlow(
   outputFolder: string,
   options: ExtractOptions
 ): Promise<void> {
-  const config = buildExtractionConfig(options);
+  const metadata = await loadVideoMetadata(videoPath);
+  const config = buildExtractionConfig(options, metadata);
   if (config.clean || config.overwrite) {
     await cleanOutputFolder(outputFolder);
   } else {
@@ -27,7 +28,6 @@ export async function runExtractFlow(
 
   const frameFiles = await listFrameFiles(outputFolder);
   const videoHash = await hashVideoSource(videoPath);
-  const metadata = await loadVideoMetadata(videoPath);
   const manifest = createManifest(
     videoPath,
     videoHash,

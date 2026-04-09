@@ -4,6 +4,6 @@ This package suite does not render natively in Python. The supported pattern is 
 
 Typical flow:
 
-1. Run `pnpm prepare:example-assets` or `npx immersive-scroll extract ...` during your asset build.
+1. Run `pnpm extract "<video-path>"` or `npx immersive-scroll extract ...` during your asset build.
 2. Serve the generated `manifest.json` and frame files from your static directory.
 3. Mount the web adapter in the rendered HTML page.

@@ -14,6 +14,7 @@ export function createContainerStructure(container: HTMLElement) {
   viewport.style.top = '0';
   viewport.style.minHeight = '100vh';
   viewport.style.overflow = 'hidden';
+  viewport.style.isolation = 'isolate';
 
   overlay.style.position = 'absolute';
   overlay.style.inset = '0';

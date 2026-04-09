@@ -1,19 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import type { CSSProperties } from 'react';
+import { Bug, PanelRightDashed, Pin } from 'lucide-react';
 import {
   ImmersiveLayer,
   ImmersiveScroll,
+  type ImmersiveScrollbarProps,
+  useImmersiveConfigControls,
   useImmersiveFrame,
   useImmersiveProgress
 } from 'immersive-scroll';
 import {
+  defaultSceneFramesPath,
   landingImmersiveConfig,
   landingSource,
   nextDemoNavigationLinks
 } from '../landing-content';
 import { docsQuickstartSnippets } from '../reference-content';
 import { DocsFrame, type DocsSidebarGroup } from './DocsFrame';
+import { SceneToolbarButton } from './SceneToolbarButton';
+
+type ScrollbarPositionMode = 'absolute' | 'fixed';
 
 const demoSidebarGroups: readonly DocsSidebarGroup[] = [
   {
@@ -34,42 +41,32 @@ const demoSidebarGroups: readonly DocsSidebarGroup[] = [
   }
 ] as const;
 
-function BugIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="icon-button__icon"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M9 7.5V5.8A3 3 0 0 1 12 3a3 3 0 0 1 3 2.8v1.7M6.8 9h10.4M8 13h8M9 17h6M5 9l-2-2M19 9l2-2M5 15l-2 2M19 15l2 2"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
+function createDemoScrollbarProps(
+  mode: ScrollbarPositionMode,
+  isVisible: boolean
+) {
+  const fixedStyle: CSSProperties = {
+    top: '104px',
+    right: 'max(20px, calc((100vw - min(1440px, 100vw)) / 2 + 244px))',
+    bottom: '28px'
+  };
 
-function ScrollbarIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="icon-button__icon"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M18 4.5v15M18 9.5h-2.5a1.5 1.5 0 0 0-1.5 1.5v2a1.5 1.5 0 0 0 1.5 1.5H18M8 6.5H6a1.5 1.5 0 0 0-1.5 1.5v8A1.5 1.5 0 0 0 6 17.5h2"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
+  return {
+    visible: isVisible,
+    positionMode: mode,
+    ...(mode === 'absolute'
+      ? {
+          bottom: 18,
+          right: 18,
+          top: 18
+        }
+      : {
+          style: fixedStyle
+        }),
+    thumbStyle: {
+      boxShadow: '0 0 18px rgba(24, 24, 27, 0.16)'
+    }
+  } satisfies ImmersiveScrollbarProps;
 }
 
 function SceneStatus() {
@@ -89,8 +86,25 @@ function SceneStatus() {
 }
 
 export function DemoPage() {
-  const [showDebug, setShowDebug] = useState(false);
-  const [showScrollbar, setShowScrollbar] = useState(true);
+  const sceneControls = useImmersiveConfigControls({
+    initialConfig: {
+      debug: { enabled: false },
+      scrollbar: {
+        enabled: true,
+        positionMode: 'absolute'
+      }
+    }
+  });
+  const showDebug = sceneControls.config.debug?.enabled ?? false;
+  const showScrollbar = sceneControls.config.scrollbar?.enabled ?? true;
+  const scrollbarPositionMode: ScrollbarPositionMode =
+    sceneControls.config.scrollbar?.positionMode === 'fixed'
+      ? 'fixed'
+      : 'absolute';
+  const scrollbarProps = createDemoScrollbarProps(
+    scrollbarPositionMode,
+    showScrollbar
+  );
 
   return (
     <DocsFrame
@@ -99,6 +113,7 @@ export function DemoPage() {
         'Live preview',
         'Debug toggle',
         'Scrollbar toggle',
+        'Fixed/Absolute rail',
         'Light/Dark ready'
       ]}
       description="This page is the closest thing to a component reference demo. It shows the immersive scene in context, exposes the common toggles people need while integrating it, and keeps the usage guidance next to the live surface."
@@ -124,48 +139,56 @@ export function DemoPage() {
               ...landingImmersiveConfig,
               debug: {
                 ...landingImmersiveConfig.debug,
-                enabled: showDebug
+                ...sceneControls.config.debug
               },
               scrollbar: {
                 ...landingImmersiveConfig.scrollbar,
-                enabled: showScrollbar
+                ...sceneControls.config.scrollbar
               }
             }}
-            framesPath="/immersive/ocean"
-            scrollbarProps={{
-              visible: showScrollbar,
-              thumbStyle: {
-                boxShadow: '0 0 18px rgba(24, 24, 27, 0.16)'
-              }
-            }}
+            framesPath={defaultSceneFramesPath}
+            scrollbarProps={scrollbarProps}
             overlay={
               <ImmersiveLayer className="immersive-overlay">
                 <div className="landing-vignette demo-scene__vignette" />
                 <div className="demo-toolbar">
-                  <button
-                    aria-pressed={showDebug}
-                    className={`demo-toolbar__button${
-                      showDebug ? ' demo-toolbar__button--active' : ''
-                    }`}
-                    type="button"
-                    onClick={() => setShowDebug((value) => !value)}
-                  >
-                    <BugIcon />
-                    <span>{showDebug ? 'Hide debug' : 'Show debug'}</span>
-                  </button>
-                  <button
-                    aria-pressed={showScrollbar}
-                    className={`demo-toolbar__button${
-                      showScrollbar ? ' demo-toolbar__button--active' : ''
-                    }`}
-                    type="button"
-                    onClick={() => setShowScrollbar((value) => !value)}
-                  >
-                    <ScrollbarIcon />
-                    <span>
-                      {showScrollbar ? 'Hide scrollbar' : 'Show scrollbar'}
-                    </span>
-                  </button>
+                  <SceneToolbarButton
+                    active={showDebug}
+                    icon={Bug}
+                    label={showDebug ? 'Hide debug' : 'Show debug'}
+                    onClick={() =>
+                      sceneControls.updateDebug({
+                        enabled: !showDebug
+                      })
+                    }
+                  />
+                  <SceneToolbarButton
+                    active={showScrollbar}
+                    icon={PanelRightDashed}
+                    label={showScrollbar ? 'Hide scrollbar' : 'Show scrollbar'}
+                    onClick={() =>
+                      sceneControls.updateScrollbar({
+                        enabled: !showScrollbar
+                      })
+                    }
+                  />
+                  <SceneToolbarButton
+                    active={scrollbarPositionMode === 'fixed'}
+                    icon={Pin}
+                    label={
+                      scrollbarPositionMode === 'fixed'
+                        ? 'Rail: fixed'
+                        : 'Rail: absolute'
+                    }
+                    onClick={() =>
+                      sceneControls.updateScrollbar({
+                        positionMode:
+                          scrollbarPositionMode === 'absolute'
+                            ? 'fixed'
+                            : 'absolute'
+                      })
+                    }
+                  />
                 </div>
                 <SceneStatus />
                 <div className="demo-source-card">
@@ -291,6 +314,14 @@ export function DemoPage() {
               `scrollbarProps.visible`.
             </p>
           </article>
+          <article className="docs-card">
+            <h3>Position mode</h3>
+            <p>
+              Flip between `absolute` and `fixed` placement so you can verify
+              whether the rail should stay scoped to the scene or lock to the
+              viewport.
+            </p>
+          </article>
         </div>
       </section>
 
@@ -321,13 +352,14 @@ export function DemoPage() {
         <div className="docs-section__header">
           <h2>Code</h2>
           <p>
-            This is the shape used by the demo scene. It keeps the live preview
-            declarative and exposes the toggles through regular React state.
+            This is the shape used by the demo scene. The public controls hook
+            keeps the preview declarative while still exposing a typed config
+            surface for the toolbar.
           </p>
         </div>
 
         <pre className="code-block">
-          <code>{`const [showDebug, setShowDebug] = useState(false);\nconst [showScrollbar, setShowScrollbar] = useState(true);\n\n<ImmersiveScroll\n  framesPath="/immersive/ocean"\n  config={{\n    debug: { enabled: showDebug },\n    scrollbar: { enabled: showScrollbar, positionMode: 'absolute' }\n  }}\n  scrollbarProps={{\n    visible: showScrollbar,\n    right: 20,\n    top: 20,\n    bottom: 20\n  }}\n  overlay={<ImmersiveLayer>{/* toolbar + status */}</ImmersiveLayer>}\n>\n  {/* story panels */}\n</ImmersiveScroll>`}</code>
+          <code>{`const sceneControls = useImmersiveConfigControls({\n  initialConfig: {\n    debug: { enabled: false },\n    scrollbar: { enabled: true, positionMode: 'absolute' }\n  }\n});\n\nconst showDebug = sceneControls.config.debug?.enabled ?? false;\nconst showScrollbar = sceneControls.config.scrollbar?.enabled ?? true;\nconst scrollbarPositionMode =\n  sceneControls.config.scrollbar?.positionMode === 'fixed'\n    ? 'fixed'\n    : 'absolute';\n\n<ImmersiveScroll\n  framesPath="/immersive/scene"\n  config={{\n    debug: {\n      ...defaultConfig.debug,\n      ...sceneControls.config.debug\n    },\n    scrollbar: {\n      ...defaultConfig.scrollbar,\n      ...sceneControls.config.scrollbar\n    }\n  }}\n  scrollbarProps={{\n    visible: showScrollbar,\n    positionMode: scrollbarPositionMode,\n    ...(scrollbarPositionMode === 'absolute'\n      ? { top: 18, right: 18, bottom: 18 }\n      : { style: fixedStyle })\n  }}\n/>`}</code>
         </pre>
       </section>
     </DocsFrame>

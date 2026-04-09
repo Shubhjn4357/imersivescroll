@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useRef } from 'react';
+import { Bug, PanelRightDashed, Pin } from 'lucide-react';
 import {
   ImmersiveLayer,
   ImmersiveScroll,
@@ -9,6 +10,7 @@ import {
   useImmersiveProgress
 } from 'immersive-scroll';
 import {
+  defaultSceneFramesPath,
   defaultLandingActions,
   defaultLandingDestinationCards,
   defaultLandingNavigationLinks,
@@ -21,52 +23,19 @@ import {
   type DestinationCard,
   type SiteLink
 } from '../landing-content';
+import { SceneToolbarButton } from './SceneToolbarButton';
 import { SiteChrome } from './SiteChrome';
 
-function BugIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="icon-button__icon"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M9 7.5V5.8A3 3 0 0 1 12 3a3 3 0 0 1 3 2.8v1.7M6.8 9h10.4M8 13h8M9 17h6M5 9l-2-2M19 9l2-2M5 15l-2 2M19 15l2 2"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
-
-function ScrollbarIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="icon-button__icon"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M18 4.5v15M18 9.5h-2.5a1.5 1.5 0 0 0-1.5 1.5v2a1.5 1.5 0 0 0 1.5 1.5H18M8 6.5H6a1.5 1.5 0 0 0-1.5 1.5v8A1.5 1.5 0 0 0 6 17.5h2"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
+type ScrollbarPositionMode = 'absolute' | 'fixed';
 
 export interface ImmersiveLandingProps {
   runtimeLabel: string;
   showDebug: boolean;
   showScrollbar: boolean;
+  scrollbarPositionMode: ScrollbarPositionMode;
   onToggleDebug: () => void;
   onToggleScrollbar: () => void;
+  onToggleScrollbarPositionMode: () => void;
   footer?: ReactNode;
   navigationLinks?: readonly SiteLink[];
   actionLinks?: readonly SiteLink[];
@@ -94,8 +63,10 @@ export function ImmersiveLanding({
   runtimeLabel,
   showDebug,
   showScrollbar,
+  scrollbarPositionMode,
   onToggleDebug,
   onToggleScrollbar,
+  onToggleScrollbarPositionMode,
   footer,
   navigationLinks = defaultLandingNavigationLinks,
   actionLinks = defaultLandingActions,
@@ -142,20 +113,21 @@ export function ImmersiveLanding({
 
           <aside className="home-hero__aside">
             <article className="docs-card">
-              <h3>One package, multiple surfaces</h3>
+              <h3>One package, one asset flow</h3>
               <p>
                 Use the home page for the overall story, the docs for the API,
                 the demo for the live component preview, and the playground for
-                tuning.
+                tuning. The same package also ships the CLI that rebuilds the
+                shared frame sequence used across every example surface.
               </p>
             </article>
             <article className="docs-code-card">
               <div className="docs-code-card__header">
-                <span className="docs-chip">Install</span>
-                <h3>Start with the public package</h3>
+                <span className="docs-chip">Quick start</span>
+                <h3>Install once, then extract once</h3>
               </div>
               <pre className="code-block">
-                <code>pnpm add immersive-scroll gsap</code>
+                <code>{`pnpm add immersive-scroll gsap\npnpm extract "./examples/assets/wildrobot.mp4"`}</code>
               </pre>
             </article>
           </aside>
@@ -181,44 +153,46 @@ export function ImmersiveLanding({
                 },
                 scrollbar: {
                   ...landingImmersiveConfig.scrollbar,
-                  enabled: showScrollbar
+                  enabled: showScrollbar,
+                  positionMode: scrollbarPositionMode
                 }
               }}
-              framesPath="/immersive/ocean"
+              framesPath={defaultSceneFramesPath}
               scrollbarProps={{
                 visible: showScrollbar,
-                right: 18,
-                top: 18,
-                bottom: 18
+                positionMode: scrollbarPositionMode,
+                right: scrollbarPositionMode === 'absolute' ? 18 : 24,
+                top: scrollbarPositionMode === 'absolute' ? 18 : 96,
+                bottom: scrollbarPositionMode === 'absolute' ? 18 : 28
               }}
               overlay={
                 <ImmersiveLayer className="immersive-overlay">
                   <div className="landing-vignette demo-scene__vignette" />
                   <div className="demo-toolbar">
-                    <button
-                      aria-pressed={showDebug}
-                      className={`demo-toolbar__button${
-                        showDebug ? ' demo-toolbar__button--active' : ''
-                      }`}
-                      type="button"
+                    <SceneToolbarButton
+                      active={showDebug}
+                      icon={Bug}
+                      label={showDebug ? 'Hide debug' : 'Show debug'}
                       onClick={onToggleDebug}
-                    >
-                      <BugIcon />
-                      <span>{showDebug ? 'Hide debug' : 'Show debug'}</span>
-                    </button>
-                    <button
-                      aria-pressed={showScrollbar}
-                      className={`demo-toolbar__button${
-                        showScrollbar ? ' demo-toolbar__button--active' : ''
-                      }`}
-                      type="button"
+                    />
+                    <SceneToolbarButton
+                      active={showScrollbar}
+                      icon={PanelRightDashed}
+                      label={
+                        showScrollbar ? 'Hide scrollbar' : 'Show scrollbar'
+                      }
                       onClick={onToggleScrollbar}
-                    >
-                      <ScrollbarIcon />
-                      <span>
-                        {showScrollbar ? 'Hide scrollbar' : 'Show scrollbar'}
-                      </span>
-                    </button>
+                    />
+                    <SceneToolbarButton
+                      active={scrollbarPositionMode === 'fixed'}
+                      icon={Pin}
+                      label={
+                        scrollbarPositionMode === 'fixed'
+                          ? 'Rail: fixed'
+                          : 'Rail: absolute'
+                      }
+                      onClick={onToggleScrollbarPositionMode}
+                    />
                   </div>
                   <HomeSceneStatus />
                   <div className="demo-source-card">

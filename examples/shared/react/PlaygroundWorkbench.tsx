@@ -4,22 +4,30 @@ import type { ChangeEvent, CSSProperties, UIEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   ImmersiveFrameManifest,
-  ObjectFitMode
-} from '../../../packages/shared/src';
-import { landingSource } from '../landing-content';
+  ObjectFitMode,
+  PartialImmersiveConfig
+} from 'immersive-scroll';
+import { useImmersiveConfigControls } from 'immersive-scroll';
+import {
+  defaultSceneFramesPath,
+  defaultSceneManifestPath,
+  landingSource
+} from '../landing-content';
 
-interface PlaygroundControls {
+interface WorkbenchVisualState {
   overlayOpacity: number;
   brightness: number;
   contrast: number;
   saturate: number;
   blur: number;
   objectFit: ObjectFitMode;
+}
+
+interface WorkbenchScrollbarState {
   showScrollbar: boolean;
   trackOpacity: number;
   thumbOpacity: number;
   thumbColor: string;
-  scrollScreens: number;
 }
 
 interface ViewportSize {
@@ -35,19 +43,34 @@ interface PreviewPanel {
   details: readonly string[];
 }
 
-const defaultControls: PlaygroundControls = {
+const defaultWorkbenchVisualState: WorkbenchVisualState = {
   overlayOpacity: 0.24,
   brightness: 0.96,
   contrast: 1.08,
   saturate: 1.12,
   blur: 0,
-  objectFit: 'cover',
+  objectFit: 'cover'
+};
+
+const defaultWorkbenchScrollbarState: WorkbenchScrollbarState = {
   showScrollbar: true,
   trackOpacity: 0.18,
   thumbOpacity: 0.94,
-  thumbColor: '#8de1ff',
-  scrollScreens: 3.2
+  thumbColor: '#8de1ff'
 };
+
+const defaultWorkbenchConfig = {
+  visual: defaultWorkbenchVisualState,
+  scrollbar: {
+    enabled: defaultWorkbenchScrollbarState.showScrollbar,
+    visibilityMode: 'manual',
+    trackOpacity: defaultWorkbenchScrollbarState.trackOpacity,
+    thumbOpacity: defaultWorkbenchScrollbarState.thumbOpacity,
+    thumbColor: defaultWorkbenchScrollbarState.thumbColor
+  }
+} satisfies PartialImmersiveConfig;
+
+const defaultScrollScreens = 3.2;
 
 const thumbColorOptions = ['#8de1ff', '#ffd36e', '#7cf7c0', '#f4a8ff'] as const;
 
@@ -117,7 +140,7 @@ function resolveFrameUrl(
   return `${basePath}/${manifest.framePrefix}-${frameNumber}.${manifest.format}`;
 }
 
-function buildCanvasFilter(controls: PlaygroundControls) {
+function buildCanvasFilter(controls: WorkbenchVisualState) {
   return `brightness(${controls.brightness}) contrast(${controls.contrast}) saturate(${controls.saturate}) blur(${controls.blur}px)`;
 }
 
@@ -125,7 +148,7 @@ function drawFrameToCanvas(
   canvas: HTMLCanvasElement,
   image: HTMLImageElement,
   viewportSize: ViewportSize,
-  controls: PlaygroundControls
+  controls: WorkbenchVisualState
 ) {
   const context = canvas.getContext('2d');
   if (!context || viewportSize.width <= 0 || viewportSize.height <= 0) {
@@ -249,6 +272,9 @@ export function PlaygroundWorkbench() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
+  const sceneControls = useImmersiveConfigControls({
+    initialConfig: defaultWorkbenchConfig
+  });
   const [manifest, setManifest] = useState<ImmersiveFrameManifest | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
@@ -257,12 +283,12 @@ export function PlaygroundWorkbench() {
     width: 0,
     height: 0
   });
-  const [controls, setControls] = useState<PlaygroundControls>(defaultControls);
+  const [scrollScreens, setScrollScreens] = useState(defaultScrollScreens);
 
   useEffect(() => {
     let active = true;
 
-    void fetch('/immersive/ocean/manifest.json')
+    void fetch(defaultSceneManifestPath)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Manifest request failed with ${response.status}`);
@@ -357,6 +383,61 @@ export function PlaygroundWorkbench() {
     };
   }, [manifest]);
 
+  const visualControls = useMemo<WorkbenchVisualState>(
+    () => ({
+      overlayOpacity:
+        sceneControls.config.visual?.overlayOpacity ??
+        defaultWorkbenchVisualState.overlayOpacity,
+      brightness:
+        sceneControls.config.visual?.brightness ??
+        defaultWorkbenchVisualState.brightness,
+      contrast:
+        sceneControls.config.visual?.contrast ??
+        defaultWorkbenchVisualState.contrast,
+      saturate:
+        sceneControls.config.visual?.saturate ??
+        defaultWorkbenchVisualState.saturate,
+      blur:
+        sceneControls.config.visual?.blur ?? defaultWorkbenchVisualState.blur,
+      objectFit:
+        sceneControls.config.visual?.objectFit ??
+        defaultWorkbenchVisualState.objectFit
+    }),
+    [sceneControls.config.visual]
+  );
+
+  const scrollbarControls = useMemo<WorkbenchScrollbarState>(
+    () => ({
+      showScrollbar:
+        sceneControls.config.scrollbar?.enabled ??
+        defaultWorkbenchScrollbarState.showScrollbar,
+      trackOpacity:
+        sceneControls.config.scrollbar?.trackOpacity ??
+        defaultWorkbenchScrollbarState.trackOpacity,
+      thumbOpacity:
+        sceneControls.config.scrollbar?.thumbOpacity ??
+        defaultWorkbenchScrollbarState.thumbOpacity,
+      thumbColor:
+        sceneControls.config.scrollbar?.thumbColor ??
+        defaultWorkbenchScrollbarState.thumbColor
+    }),
+    [sceneControls.config.scrollbar]
+  );
+
+  const workbenchConfig = useMemo<PartialImmersiveConfig>(
+    () => ({
+      visual: visualControls,
+      scrollbar: {
+        enabled: scrollbarControls.showScrollbar,
+        visibilityMode: 'manual',
+        trackOpacity: scrollbarControls.trackOpacity,
+        thumbOpacity: scrollbarControls.thumbOpacity,
+        thumbColor: scrollbarControls.thumbColor
+      }
+    }),
+    [scrollbarControls, visualControls]
+  );
+
   const currentFrame = useMemo(() => {
     if (!manifest) {
       return 0;
@@ -375,13 +456,13 @@ export function PlaygroundWorkbench() {
       return;
     }
 
-    drawFrameToCanvas(canvas, image, viewportSize, controls);
-  }, [controls, currentFrame, loadedFrameCount, viewportSize]);
+    drawFrameToCanvas(canvas, image, viewportSize, visualControls);
+  }, [currentFrame, loadedFrameCount, viewportSize, visualControls]);
 
   const stageHeight = useMemo(() => {
-    const viewportHeight = Math.max(viewportSize.height, 560);
-    return viewportHeight * controls.scrollScreens;
-  }, [controls.scrollScreens, viewportSize.height]);
+    const nextViewportHeight = Math.max(viewportSize.height, 560);
+    return nextViewportHeight * scrollScreens;
+  }, [scrollScreens, viewportSize.height]);
 
   const sectionMinHeight = useMemo(() => {
     if (previewPanels.length === 0) {
@@ -399,41 +480,35 @@ export function PlaygroundWorkbench() {
   const thumbStyle: CSSProperties = useMemo(
     () => ({
       height: thumbHeight,
-      opacity: controls.thumbOpacity,
-      background: controls.thumbColor,
+      opacity: scrollbarControls.thumbOpacity,
+      background: scrollbarControls.thumbColor,
       transform: `translate3d(0, calc((100% - ${thumbHeight}px) * ${progress.toFixed(4)}), 0)`,
-      boxShadow: `0 0 24px ${controls.thumbColor}55`
+      boxShadow: `0 0 24px ${scrollbarControls.thumbColor}55`
     }),
-    [controls.thumbColor, controls.thumbOpacity, progress, thumbHeight]
+    [
+      progress,
+      scrollbarControls.thumbColor,
+      scrollbarControls.thumbOpacity,
+      thumbHeight
+    ]
   );
 
   const liveConfig = useMemo(
     () =>
       JSON.stringify(
         {
-          framesPath: '/immersive/ocean',
-          config: {
-            visual: {
-              overlayOpacity: Number(controls.overlayOpacity.toFixed(2)),
-              brightness: Number(controls.brightness.toFixed(2)),
-              contrast: Number(controls.contrast.toFixed(2)),
-              saturate: Number(controls.saturate.toFixed(2)),
-              blur: Number(controls.blur.toFixed(1)),
-              objectFit: controls.objectFit
-            },
-            scrollbar: {
-              enabled: controls.showScrollbar,
-              visibilityMode: 'manual',
-              trackOpacity: Number(controls.trackOpacity.toFixed(2)),
-              thumbOpacity: Number(controls.thumbOpacity.toFixed(2)),
-              thumbColor: controls.thumbColor
-            }
+          framesPath: defaultSceneFramesPath,
+          viewportProps: { position: 'sticky', top: 0 },
+          mediaProps: { position: 'absolute', inset: 0 },
+          config: workbenchConfig,
+          preview: {
+            scrollScreens: Number(scrollScreens.toFixed(1))
           }
         },
         null,
         2
       ),
-    [controls]
+    [scrollScreens, workbenchConfig]
   );
 
   const handleScroll = (event: UIEvent<HTMLDivElement>) => {
@@ -441,15 +516,6 @@ export function PlaygroundWorkbench() {
     const maxScroll = Math.max(element.scrollHeight - element.clientHeight, 1);
     setProgress(element.scrollTop / maxScroll);
   };
-
-  const updateControls =
-    <TKey extends keyof PlaygroundControls>(key: TKey) =>
-    (nextValue: PlaygroundControls[TKey]) => {
-      setControls((currentControls) => ({
-        ...currentControls,
-        [key]: nextValue
-      }));
-    };
 
   return (
     <section className="playground-workbench" data-trigger="section">
@@ -461,6 +527,17 @@ export function PlaygroundWorkbench() {
               Scroll inside this panel to test the scene without moving the
               whole route.
             </h3>
+            <p>
+              The workbench is driven by
+              <code> useImmersiveConfigControls() </code>
+              and the shared <code>/immersive/scene</code> asset set, so the
+              preview and the package docs stay aligned.
+            </p>
+            <div className="docs-inline-list">
+              <span className="docs-chip">Hook-driven controls</span>
+              <span className="docs-chip">Shared /immersive/scene</span>
+              <span className="docs-chip">viewportProps + mediaProps</span>
+            </div>
           </div>
           <div className="info-pill-row">
             <span className="info-pill">
@@ -489,16 +566,16 @@ export function PlaygroundWorkbench() {
               <canvas className="playground-preview-canvas" ref={canvasRef} />
               <div
                 className="playground-preview-vignette"
-                style={{ opacity: controls.overlayOpacity }}
+                style={{ opacity: visualControls.overlayOpacity }}
               />
-              {controls.showScrollbar ? (
+              {scrollbarControls.showScrollbar ? (
                 <div
                   className="playground-preview-scrollbar"
                   aria-hidden="true"
                 >
                   <div
                     className="playground-preview-scrollbar__track"
-                    style={{ opacity: controls.trackOpacity }}
+                    style={{ opacity: scrollbarControls.trackOpacity }}
                   />
                   <div
                     className="playground-preview-scrollbar__thumb"
@@ -571,11 +648,18 @@ export function PlaygroundWorkbench() {
             <h3>
               Tweak the scene props and watch the preview react immediately.
             </h3>
+            <p>
+              These fields patch the same typed config surface you would use in
+              a product route or a custom debug toolbar.
+            </p>
           </div>
           <button
             className="action-pill"
             type="button"
-            onClick={() => setControls(defaultControls)}
+            onClick={() => {
+              sceneControls.resetConfig();
+              setScrollScreens(defaultScrollScreens);
+            }}
           >
             Reset controls
           </button>
@@ -586,55 +670,65 @@ export function PlaygroundWorkbench() {
             <p className="eyebrow">Visual</p>
             <RangeField
               label="Overlay opacity"
-              value={controls.overlayOpacity}
+              value={visualControls.overlayOpacity}
               minimum={0}
               maximum={0.55}
               step={0.01}
-              onChange={updateControls('overlayOpacity')}
+              onChange={(nextValue) =>
+                sceneControls.updateVisual({ overlayOpacity: nextValue })
+              }
               formatter={formatPercent}
             />
             <RangeField
               label="Brightness"
-              value={controls.brightness}
+              value={visualControls.brightness}
               minimum={0.7}
               maximum={1.25}
               step={0.01}
-              onChange={updateControls('brightness')}
+              onChange={(nextValue) =>
+                sceneControls.updateVisual({ brightness: nextValue })
+              }
             />
             <RangeField
               label="Contrast"
-              value={controls.contrast}
+              value={visualControls.contrast}
               minimum={0.8}
               maximum={1.4}
               step={0.01}
-              onChange={updateControls('contrast')}
+              onChange={(nextValue) =>
+                sceneControls.updateVisual({ contrast: nextValue })
+              }
             />
             <RangeField
               label="Saturate"
-              value={controls.saturate}
+              value={visualControls.saturate}
               minimum={0.8}
               maximum={1.5}
               step={0.01}
-              onChange={updateControls('saturate')}
+              onChange={(nextValue) =>
+                sceneControls.updateVisual({ saturate: nextValue })
+              }
             />
             <RangeField
               label="Blur"
-              value={controls.blur}
+              value={visualControls.blur}
               minimum={0}
               maximum={8}
               step={0.1}
-              onChange={updateControls('blur')}
+              onChange={(nextValue) =>
+                sceneControls.updateVisual({ blur: nextValue })
+              }
             />
 
             <label className="control-field">
               <span className="control-field__label">Object fit</span>
               <select
                 className="control-select"
-                value={controls.objectFit}
+                value={visualControls.objectFit}
                 onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-                  updateControls('objectFit')(
-                    event.currentTarget.value as ObjectFitMode
-                  )
+                  sceneControls.updateVisual({
+                    objectFit: event.currentTarget.value as ObjectFitMode
+                  })
                 }
               >
                 <option value="cover">cover</option>
@@ -648,25 +742,31 @@ export function PlaygroundWorkbench() {
             <p className="eyebrow">Scrollbar</p>
             <ToggleField
               label="Show custom scrollbar"
-              checked={controls.showScrollbar}
-              onChange={updateControls('showScrollbar')}
+              checked={scrollbarControls.showScrollbar}
+              onChange={(nextValue) =>
+                sceneControls.updateScrollbar({ enabled: nextValue })
+              }
             />
             <RangeField
               label="Track opacity"
-              value={controls.trackOpacity}
+              value={scrollbarControls.trackOpacity}
               minimum={0}
               maximum={0.4}
               step={0.01}
-              onChange={updateControls('trackOpacity')}
+              onChange={(nextValue) =>
+                sceneControls.updateScrollbar({ trackOpacity: nextValue })
+              }
               formatter={formatPercent}
             />
             <RangeField
               label="Thumb opacity"
-              value={controls.thumbOpacity}
+              value={scrollbarControls.thumbOpacity}
               minimum={0.2}
               maximum={1}
               step={0.01}
-              onChange={updateControls('thumbOpacity')}
+              onChange={(nextValue) =>
+                sceneControls.updateScrollbar({ thumbOpacity: nextValue })
+              }
               formatter={formatPercent}
             />
 
@@ -678,13 +778,15 @@ export function PlaygroundWorkbench() {
                     key={color}
                     aria-label={`Use ${color} thumb color`}
                     className={`control-swatch${
-                      controls.thumbColor === color
+                      scrollbarControls.thumbColor === color
                         ? ' control-swatch--active'
                         : ''
                     }`}
                     style={{ background: color }}
                     type="button"
-                    onClick={() => updateControls('thumbColor')(color)}
+                    onClick={() =>
+                      sceneControls.updateScrollbar({ thumbColor: color })
+                    }
                   />
                 ))}
               </div>
@@ -692,11 +794,11 @@ export function PlaygroundWorkbench() {
 
             <RangeField
               label="Scroll span"
-              value={controls.scrollScreens}
+              value={scrollScreens}
               minimum={2.4}
               maximum={4.8}
               step={0.1}
-              onChange={updateControls('scrollScreens')}
+              onChange={setScrollScreens}
             />
           </div>
 
@@ -704,12 +806,24 @@ export function PlaygroundWorkbench() {
             <p className="eyebrow">Current props</p>
             <h3>Live configuration snapshot</h3>
             <p>
-              This is the shape you would pass into the React component after
-              tuning the scene in the workbench.
+              Copy this shape into the package component after tuning the scene.
+              The preview-only scroll span stays separate from the shipped
+              runtime config.
             </p>
             <pre className="code-block">
               <code>{liveConfig}</code>
             </pre>
+            <div className="docs-inline-list">
+              <span className="docs-chip docs-chip--muted">
+                pnpm extract &quot;./video.mp4&quot;
+              </span>
+              <span className="docs-chip docs-chip--muted">
+                useImmersiveConfigControls()
+              </span>
+              <span className="docs-chip docs-chip--muted">
+                Shared WebP frames
+              </span>
+            </div>
           </article>
         </div>
       </div>

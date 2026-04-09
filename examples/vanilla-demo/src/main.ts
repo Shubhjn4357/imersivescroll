@@ -1,5 +1,6 @@
 import { createImmersiveInstance } from 'immersive-scroll/web';
 import {
+  defaultSceneFramesPath,
   landingDocsCards,
   landingFeatureCards,
   landingFrameworkCards,
@@ -27,7 +28,7 @@ const vanillaLandingConfig = {
 
 const instance = createImmersiveInstance({
   container: heroElement,
-  framesPath: '/immersive/ocean',
+  framesPath: defaultSceneFramesPath,
   config: vanillaLandingConfig
 });
 

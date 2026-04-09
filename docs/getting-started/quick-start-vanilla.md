@@ -5,7 +5,10 @@ import { createImmersiveInstance } from 'immersive-scroll/web';
 
 const hero = document.querySelector('#hero');
 if (hero) {
-  createImmersiveInstance({ container: hero, framesPath: '/immersive/ocean' });
+  createImmersiveInstance({
+    container: hero,
+    framesPath: '/immersive/scene'
+  });
 }
 ```
 

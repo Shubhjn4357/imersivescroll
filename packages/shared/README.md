@@ -14,7 +14,7 @@ pnpm add @immersive-scroll/shared
 - frame and manifest contracts including `ImmersiveFrameManifest`
 - default config constants
 - validators for config, manifest, and paths
-- small utilities like `clamp()`, `deepMerge()`, `normalizePath()`, and `toError()`
+- small utilities like `assert()`, `clamp()`, `debounce()`, `deepMerge()`, `lerp()`, `normalizePath()`, `range()`, `round()`, `safeJsonParse()`, and `toError()`
 
 ## Example
 

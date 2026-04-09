@@ -1,5 +1,4 @@
 import {
-  clamp,
   createImmersiveEngine,
   DEFAULT_IMMERSIVE_CONFIG,
   normalizeImmersiveConfig
@@ -12,6 +11,7 @@ import type {
 } from '@immersive-scroll/core';
 import type { PropsWithChildren, RefObject } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { resolveProgressFromScrollY } from '../utils/scrollMetrics';
 import { ImmersiveContext } from './ImmersiveContext';
 
 interface ImmersiveScrollProviderProps extends PropsWithChildren {
@@ -169,22 +169,10 @@ export function ImmersiveScrollProvider({
 
       const currentScrollY = window.scrollY;
       const currentTimestamp = performance.now();
-      const containerElement = containerRef.current;
-      const containerRect = containerElement?.getBoundingClientRect();
-      const containerTop = containerRect
-        ? currentScrollY + containerRect.top
-        : 0;
-      const containerHeight =
-        containerRect?.height ?? document.documentElement.scrollHeight;
-      const componentScrollRange = containerHeight - window.innerHeight;
-      const globalScrollRange = Math.max(
-        document.documentElement.scrollHeight - window.innerHeight,
-        1
+      const progress = resolveProgressFromScrollY(
+        currentScrollY,
+        containerRef.current
       );
-      const progress =
-        componentScrollRange > 1
-          ? clamp((currentScrollY - containerTop) / componentScrollRange, 0, 1)
-          : clamp(currentScrollY / globalScrollRange, 0, 1);
       const deltaY = currentScrollY - lastScrollY;
       const deltaTime = Math.max(currentTimestamp - lastTimestamp, 16);
       const velocity = deltaY / deltaTime;
@@ -223,13 +211,7 @@ export function ImmersiveScrollProvider({
       void nextEngine.destroy();
       initializedRef.current = false;
     };
-  }, [
-    canvasRef,
-    containerRef,
-    normalizedConfig,
-    resolvedPlugins,
-    viewportRef
-  ]);
+  }, [canvasRef, containerRef, normalizedConfig, resolvedPlugins, viewportRef]);
 
   return (
     <ImmersiveContext.Provider

@@ -1,21 +1,59 @@
 # immersive-scroll
 
-Public package for immersive scroll scenes.
+Public package for immersive scroll scenes, typed runtime controls, and frame tooling.
 
-Install one package and import the surface you need:
+## Install
 
 ```bash
 pnpm add immersive-scroll
 ```
 
+One install gives you the React runtime, framework entry points, shared config utilities, and the `immersive-scroll` CLI.
+
+## React
+
 ```tsx
-import { ImmersiveScroll } from 'immersive-scroll';
-import { NextImmersiveScroll } from 'immersive-scroll/next';
+import {
+  ImmersiveLayer,
+  ImmersiveScroll,
+  useImmersiveConfigControls
+} from 'immersive-scroll';
+
+export function HeroStory() {
+  const controls = useImmersiveConfigControls({
+    initialConfig: {
+      visual: { objectFit: 'cover' },
+      scrollbar: { enabled: true, visibilityMode: 'manual' }
+    }
+  });
+
+  return (
+    <ImmersiveScroll
+      framesPath="/immersive/story"
+      viewportProps={{ position: 'sticky', top: 0 }}
+      mediaProps={{ position: 'absolute', inset: 0 }}
+      config={controls.config}
+      overlay={<ImmersiveLayer>Scene chrome</ImmersiveLayer>}
+    >
+      <section>Foreground story content</section>
+    </ImmersiveScroll>
+  );
+}
 ```
 
-Available entry points:
+## CLI
 
-- `immersive-scroll`: React components, hooks, scrollbar, and debug UI.
+```bash
+pnpm exec immersive-scroll extract ./assets/story.mp4 ./public/immersive/story --clean
+pnpm exec immersive-scroll validate ./public/immersive/story
+pnpm exec immersive-scroll doctor
+```
+
+## Entry points
+
+- `immersive-scroll`: React components, hooks, config/control helpers, shared config utilities, scrollbar, and debug UI.
 - `immersive-scroll/next`: Next.js client-only helpers and wrappers.
 - `immersive-scroll/solid`: Solid adapter surface.
 - `immersive-scroll/web`: Vanilla DOM API and custom-element helpers.
+
+Installing `immersive-scroll` also ships the `immersive-scroll` CLI for frame extraction, validation, repair, and manifest tooling.

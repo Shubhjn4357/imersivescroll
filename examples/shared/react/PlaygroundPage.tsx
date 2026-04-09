@@ -31,8 +31,13 @@ export function PlaygroundPage() {
   return (
     <DocsFrame
       activeHref="/playground"
-      badges={['Contained preview', 'Live controls', 'Config snapshot']}
-      description="The playground is for tuning and QA. It keeps the scene inside a bounded preview so you can adjust filters, scrollbar settings, and scroll span without moving the entire route."
+      badges={[
+        'Contained preview',
+        'Hook-driven controls',
+        'Config snapshot',
+        'Mobile-first shell'
+      ]}
+      description="The playground is the package QA surface. It keeps the scene inside a bounded preview, patches the runtime through the public controls hook, and collapses into a mobile-first layout before expanding into a larger desktop workbench."
       eyebrow="Playground"
       navigationLinks={nextDemoNavigationLinks}
       sidebarGroups={playgroundSidebarGroups}
@@ -42,9 +47,10 @@ export function PlaygroundPage() {
         <div className="docs-section__header">
           <h2>Overview</h2>
           <p>
-            Use the playground when you want to tune the scene like a component
+            Use the playground when you want to tune the scene like a package
             author, not like a page reader. The preview is intentionally
-            contained so design and implementation changes are easier to review.
+            contained so visual changes, scrollbar behavior, and live config
+            patches are easier to review without navigating the whole route.
           </p>
         </div>
 
@@ -55,8 +61,9 @@ export function PlaygroundPage() {
         <div className="docs-section__header">
           <h2>Library stack</h2>
           <p>
-            These are the moving parts behind the preview and the production
-            scene.
+            These are the layers behind the workbench and the production scene.
+            The preview consumes the shipped package surface instead of custom
+            example-only state.
           </p>
         </div>
 
@@ -76,7 +83,7 @@ export function PlaygroundPage() {
           <p>
             The playground compares the two common scene delivery strategies so
             you can choose the one that fits your quality and performance
-            budget.
+            budget, then tune the resulting config in the same bounded shell.
           </p>
         </div>
 
@@ -108,8 +115,10 @@ export function PlaygroundPage() {
         <div className="docs-section__header">
           <h2>Controls</h2>
           <p>
-            The bottom dock in the workbench maps directly to visual and
-            scrollbar props you can pass into the package.
+            The bottom dock maps directly to
+            <code> useImmersiveConfigControls() </code>
+            plus the preview-only scroll span. Tune the values here, then paste
+            the config snapshot into a real route.
           </p>
         </div>
 
@@ -128,8 +137,8 @@ export function PlaygroundPage() {
         <div className="docs-section__header">
           <h2>Code</h2>
           <p>
-            These snippets mirror the structures behind the workbench and the
-            main site demo.
+            These snippets mirror the hook-driven structures behind the
+            workbench, the demo route, and the shipped CLI workflow.
           </p>
         </div>
 

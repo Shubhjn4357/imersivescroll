@@ -7,4 +7,4 @@ The React demo at `examples/react-demo` shows:
 - subtle motion with `ImmersiveFloating`
 - a debug toggle wired into the config object
 
-Assets come from the shared sample clip prepared by `pnpm prepare:example-assets`.
+Assets come from the shared `/immersive/scene` pipeline. Use `pnpm extract "<video-path>"` to replace them or `pnpm prepare:example-assets` to restore the stock sample clip.

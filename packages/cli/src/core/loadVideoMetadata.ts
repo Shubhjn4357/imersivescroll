@@ -17,11 +17,9 @@ export async function loadVideoMetadata(
     child.on('exit', () => resolve(stderr));
   });
 
-  const durationMatch = output.match(
-    /Duration:\\s+(\\d+):(\\d+):(\\d+\\.\\d+)/
-  );
+  const durationMatch = output.match(/Duration:\s+(\d+):(\d+):(\d+\.\d+)/);
   const streamMatch = output.match(
-    /Video:.*?,\\s+(\\d+)x(\\d+).*?(\\d+(?:\\.\\d+)?)\\s+fps/
+    /Video:.*?,\s+(\d+)x(\d+).*?(\d+(?:\.\d+)?)\s+fps/
   );
 
   if (!durationMatch || !streamMatch) {

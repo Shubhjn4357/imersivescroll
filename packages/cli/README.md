@@ -14,6 +14,14 @@ Or run it without adding it to your app:
 npx immersive-scroll --help
 ```
 
+Inside this monorepo, the simplest example-asset workflow is:
+
+```bash
+pnpm extract "<video-path>"
+```
+
+That wrapper rebuilds every example app's shared `/public/immersive/scene` folder automatically.
+
 ## Commands
 
 - `extract <video> <output-folder>`: extract frames, write a manifest, and generate a frame index.
@@ -26,7 +34,8 @@ npx immersive-scroll --help
 ## Examples
 
 ```bash
-immersive-scroll extract ./assets/story.mp4 ./public/immersive/story --format webp --quality 82 --clean
+immersive-scroll extract ./assets/story.mp4 ./public/immersive/story --clean
+immersive-scroll extract ./assets/story.mp4 ./public/immersive/story --max-frames 180 --clean
 immersive-scroll validate ./public/immersive/story
 immersive-scroll doctor
 ```
@@ -34,5 +43,6 @@ immersive-scroll doctor
 ## Notes
 
 - `ffmpeg-static` is bundled, so the default flow does not require a separately installed system `ffmpeg`.
+- Extraction now defaults to roughly `250` frames, auto-lowers fps for long videos, scales oversized footage to landing-page dimensions, and tunes WebP quality automatically.
 - The CLI writes manifests that match the contracts exported by `@immersive-scroll/shared`.
 - The package is designed for build pipelines and local authoring tools, not browser usage.

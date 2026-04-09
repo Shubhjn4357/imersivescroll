@@ -19,6 +19,11 @@ program
   .option('--fps <number>', 'Extraction FPS', (value) => Number(value))
   .option('--format <format>', 'Frame format')
   .option('--quality <number>', 'Frame quality', (value) => Number(value))
+  .option(
+    '--max-frames <number>',
+    'Maximum extracted frames before auto-capping FPS (0 disables the cap)',
+    (value) => Number(value)
+  )
   .option('--prefix <string>', 'Frame prefix')
   .option('--overwrite', 'Overwrite output folder')
   .option('--clean', 'Clean output folder first')
@@ -38,6 +43,11 @@ program
   .option('--fps <number>', 'Extraction FPS', (value) => Number(value))
   .option('--format <format>', 'Frame format')
   .option('--quality <number>', 'Frame quality', (value) => Number(value))
+  .option(
+    '--max-frames <number>',
+    'Maximum extracted frames before auto-capping FPS (0 disables the cap)',
+    (value) => Number(value)
+  )
   .action((video, framesFolder, options) =>
     runRepairFlow(video, framesFolder, options)
   );

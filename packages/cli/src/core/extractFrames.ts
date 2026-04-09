@@ -3,6 +3,12 @@ import path from 'node:path';
 import ffmpegPath from 'ffmpeg-static';
 import type { ExtractionConfig } from '../types';
 
+function resolveJpegQuality(quality: number) {
+  return String(
+    Math.max(2, Math.min(31, Math.round(31 - (quality / 100) * 29)))
+  );
+}
+
 export async function extractFrames(
   videoPath: string,
   outputFolder: string,
@@ -14,14 +20,38 @@ export async function extractFrames(
   );
   const scaleFilter =
     config.width && config.height
-      ? `scale=${config.width}:${config.height}:force_original_aspect_ratio=decrease`
+      ? `scale=${config.width}:${config.height}:flags=lanczos`
       : config.width
-        ? `scale=${config.width}:-2`
+        ? `scale=${config.width}:-2:flags=lanczos`
         : config.height
-          ? `scale=-2:${config.height}`
+          ? `scale=-2:${config.height}:flags=lanczos`
           : null;
-  const filter = [scaleFilter, `fps=${config.fps}`].filter(Boolean).join(',');
-  const args = ['-y', '-i', videoPath, '-vf', filter, outputPattern];
+  const filter = [scaleFilter, `fps=${config.fps}:round=down`]
+    .filter(Boolean)
+    .join(',');
+  const codecArgs =
+    config.format === 'webp'
+      ? [
+          '-an',
+          '-c:v',
+          'libwebp',
+          '-quality',
+          String(config.quality),
+          '-compression_level',
+          '4'
+        ]
+      : config.format === 'png'
+        ? ['-an']
+        : ['-an', '-q:v', resolveJpegQuality(config.quality)];
+  const args = [
+    '-y',
+    '-i',
+    videoPath,
+    '-vf',
+    filter,
+    ...codecArgs,
+    outputPattern
+  ];
 
   await new Promise<void>((resolve, reject) => {
     const processHandle = spawn(ffmpegPath ?? 'ffmpeg', args, {

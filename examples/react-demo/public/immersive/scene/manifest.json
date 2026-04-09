@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "videoHash": "4a3e02b5da8882d5b60c02edf306b6b83a149032d034fdeefcf92c57063ddf89",
+  "sourceVideo": "/examples/assets/wildrobot.mp4",
+  "frameCount": 249,
+  "fps": 1.352,
+  "width": 1280,
+  "height": 720,
+  "title": "wildrobot",
+  "author": null,
+  "format": "webp",
+  "quality": 80,
+  "framePattern": "frame-%05d.webp",
+  "framePrefix": "frame",
+  "generatedAt": "2026-04-09T11:10:58.355Z",
+  "generator": "immersive-scroll root extract",
+  "configFingerprint": "1.352:webp:80:1280x720:249",
+  "framesPath": "/immersive/scene",
+  "sourcePageUrl": null,
+  "licenseUrl": null
+}

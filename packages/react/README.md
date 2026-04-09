@@ -13,7 +13,8 @@ pnpm add @immersive-scroll/react
 - `ImmersiveScroll`: root component that pins the viewport and drives the engine.
 - `ImmersiveLayer`: overlay layer for HUDs, gradients, controls, and floating chrome.
 - `ImmersiveFloating`, `ImmersiveTriggerZone`, `ImmersiveScrollbar`, `ImmersiveDebugPanel`
-- Hooks including `useImmersiveFrame()`, `useImmersiveProgress()`, `useImmersiveScroll()`, and `useImmersiveScrollbar()`
+- Hooks including `useImmersiveFrame()`, `useImmersiveProgress()`, `useImmersiveScroll()`, `useImmersiveScrollbar()`, and `useImmersiveConfigControls()`
+- Shared config exports including `DEFAULT_IMMERSIVE_CONFIG`, `deepMerge()`, `ImmersiveConfig`, and `PartialImmersiveConfig`
 
 ## Quick start
 
@@ -21,6 +22,7 @@ pnpm add @immersive-scroll/react
 import {
   ImmersiveLayer,
   ImmersiveScroll,
+  useImmersiveConfigControls,
   useImmersiveProgress
 } from '@immersive-scroll/react';
 
@@ -30,10 +32,16 @@ function ProgressBadge() {
 }
 
 export function StoryScene() {
+  const sceneControls = useImmersiveConfigControls({
+    initialConfig: {
+      scrollbar: { enabled: true, visibilityMode: 'manual' }
+    }
+  });
+
   return (
     <ImmersiveScroll
       framesPath="/immersive/story"
-      config={{ scrollbar: { enabled: true, visibilityMode: 'manual' } }}
+      config={sceneControls.config}
       overlay={
         <ImmersiveLayer>
           <ProgressBadge />
@@ -50,4 +58,5 @@ export function StoryScene() {
 
 - The component tree is client-side and expects a public frame folder or explicit manifest path.
 - Scrollbar placement and interactivity can be controlled through config or `scrollbarProps`.
+- `useImmersiveConfigControls()` is useful for toolbars, preview knobs, and any route-level UI that needs to patch scene config without hand-writing nested state.
 - For Next.js-specific client wrappers, use `@immersive-scroll/next`.

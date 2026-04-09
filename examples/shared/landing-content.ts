@@ -53,6 +53,9 @@ export interface CodeSnippet {
   code: string;
 }
 
+export const defaultSceneFramesPath = '/immersive/scene';
+export const defaultSceneManifestPath = `${defaultSceneFramesPath}/manifest.json`;
+
 export const defaultLandingNavigationLinks: SiteLink[] = [
   { label: 'Overview', href: '#hero' },
   { label: 'Features', href: '#features' },
@@ -129,13 +132,13 @@ export const landingHero = {
   eyebrow: 'Immersive Scroll Video',
   title: 'Build polished scroll cinema without sacrificing native scroll.',
   description:
-    'A docs-first site system for frame sequences, sticky canvases, configurable scene chrome, and cross-framework adapters.'
+    'A mobile-first component system for frame sequences, sticky canvases, configurable scene chrome, shipped CLI tooling, and cross-framework adapters.'
 };
 
 export const landingMetrics: LandingMetric[] = [
   { label: 'Core pattern', value: 'Sticky canvas + scrub' },
-  { label: 'Source clip', value: '48 optimized JPG frames' },
-  { label: 'Adapters', value: 'Next, React, Solid, Web' }
+  { label: 'Source pipeline', value: '24/30 fps -> WebP' },
+  { label: 'Controls', value: 'Typed hooks + props' }
 ];
 
 export const landingSections: LandingSection[] = [
@@ -261,9 +264,9 @@ export const landingDocsCards: LandingCard[] = [
 ];
 
 export const landingSource = {
-  title: 'Asset source',
-  label: 'Pixabay ocean drone clip',
-  license: 'Pixabay License'
+  title: 'Scene asset',
+  label: 'Generated frame sequence',
+  license: 'See /public/immersive/scene/SOURCE.md'
 };
 
 export const docsCollections: ContentCollection[] = [

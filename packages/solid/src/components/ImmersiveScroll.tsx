@@ -51,7 +51,8 @@ export function ImmersiveScroll(props: ImmersiveScrollProps) {
               props.config?.trigger?.pin === false ? 'relative' : 'sticky',
             top: '0',
             'min-height': '100vh',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            isolation: 'isolate'
           }}
         >
           <ImmersiveCanvas

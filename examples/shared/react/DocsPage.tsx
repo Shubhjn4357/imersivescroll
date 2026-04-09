@@ -76,8 +76,8 @@ export function DocsPage() {
   return (
     <DocsFrame
       activeHref="/docs"
-      badges={['Quick start', 'Props', 'Hooks', 'Theming']}
-      description="The docs are organized like a component reference, not a marketing page. Start with installation, then move through the scene lifecycle, the React API, and the configuration surface."
+      badges={['Quick start', 'Props', 'Hooks', 'CLI', 'Responsive shell']}
+      description="The docs are organized like a component reference, not a marketing page. Start with the single-package install, move through the scene lifecycle, then use the hook and prop reference to shape a responsive route shell."
       eyebrow="Documentation"
       navigationLinks={nextDemoNavigationLinks}
       sidebarGroups={docsSidebarGroups}
@@ -88,9 +88,11 @@ export function DocsPage() {
           <h2>Introduction</h2>
           <p>
             `immersive-scroll` is a scene wrapper for frame-sequence
-            storytelling. It pins a viewport, renders frames on a canvas, and
-            exposes the scene state through React hooks so overlays and
-            supporting UI stay predictable.
+            storytelling. One package now ships the React runtime, the framework
+            adapters, the config-control hook, and the CLI you use to generate
+            frame assets. It pins a viewport, renders frames on a canvas, and
+            exposes scene state through React hooks so overlays and supporting
+            UI stay predictable.
           </p>
         </div>
 
@@ -99,23 +101,24 @@ export function DocsPage() {
             <h3>What it solves</h3>
             <p>
               It removes the fragile part of scroll-cinema builds: frame
-              loading, progress mapping, viewport pinning, and reusable UI
-              state.
+              loading, progress mapping, viewport pinning, packaged scrollbar
+              chrome, and reusable UI state.
             </p>
           </article>
           <article className="docs-card">
             <h3>What you still own</h3>
             <p>
               You still control the art direction, story layout, overlay design,
-              and the page shell around the scene.
+              responsive page shell, and the route-level content around the
+              scene.
             </p>
           </article>
           <article className="docs-card">
             <h3>How to think about it</h3>
             <p>
               Treat the immersive scene like any other component: install it,
-              pass typed props, and read state from hooks instead of patching
-              internals.
+              extract assets once, pass typed props, and read state from hooks
+              instead of patching internals.
             </p>
           </article>
         </div>
@@ -125,8 +128,9 @@ export function DocsPage() {
         <div className="docs-section__header">
           <h2>Installation</h2>
           <p>
-            Add the adapter, point it at a frame directory, and keep the first
-            render simple before you layer in motion or decorative chrome.
+            Add the public package, prepare the asset directory, and keep the
+            first render simple before you layer in motion, custom placement, or
+            decorative chrome.
           </p>
         </div>
 
@@ -158,11 +162,14 @@ export function DocsPage() {
         <ol className="docs-step-list">
           <li>
             Prepare a video or a frame sequence and publish it into a public
-            directory with a matching manifest.
+            directory with a matching manifest. In this repo the shortest path
+            is <code>pnpm extract &quot;./video.mp4&quot;</code>.
           </li>
           <li>
             Mount <code>{'<ImmersiveScroll />'}</code> with{' '}
-            <code>framesPath</code> and only the config you actually need.
+            <code>framesPath</code>, placement props like{' '}
+            <code>viewportProps</code> or <code>mediaProps</code>, and only the
+            config you actually need.
           </li>
           <li>
             Add overlay UI through <code>{'<ImmersiveLayer />'}</code> and read
@@ -267,7 +274,9 @@ export function DocsPage() {
           <p>
             The demo site now supports light and dark mode. The package itself
             stays theme-agnostic, so the scene chrome should inherit from your
-            design system instead of shipping hard-coded page colors.
+            design system instead of shipping hard-coded page colors. Build the
+            route shell mobile-first with flex and grid, then let the immersive
+            component fill that shell.
           </p>
         </div>
 
@@ -293,8 +302,9 @@ export function DocsPage() {
         <div className="docs-section__header">
           <h2>Reliability</h2>
           <p>
-            Most production bugs come from asset volume, SSR boundaries, or
-            interactive chrome that was styled outside the config system.
+            Most production bugs come from asset volume, SSR boundaries,
+            viewport placement drift, or interactive chrome that was styled
+            outside the config system.
           </p>
         </div>
 

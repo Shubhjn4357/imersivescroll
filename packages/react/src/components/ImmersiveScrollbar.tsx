@@ -107,10 +107,7 @@ export function ImmersiveScrollbar({
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [dragState, setDragState] = useState<DragState | null>(null);
-
-  if (!scrollbar.enabled) {
-    return null;
-  }
+  const isEnabled = scrollbar.enabled;
 
   const visibilityMode = resolveScrollbarVisibilityMode(
     scrollbar.autoHide,
@@ -238,10 +235,10 @@ export function ImmersiveScrollbar({
     ...rootPlacementStyle,
     width: Math.max(scrollbar.width, 18),
     zIndex: scrollbar.zIndex,
-    touchAction: isInteractive ? 'none' : undefined,
+    touchAction: isInteractive ? (dragState ? 'none' : 'pan-y') : undefined,
     userSelect: isInteractive ? 'none' : undefined,
     cursor: isInteractive ? (dragState ? 'grabbing' : 'pointer') : undefined,
-    pointerEvents: isVisible || isInteractive ? 'auto' : 'none',
+    pointerEvents: 'auto',
     ...style
   };
 
@@ -272,9 +269,14 @@ export function ImmersiveScrollbar({
     ...thumbStyle
   };
 
+  if (!isEnabled) {
+    return null;
+  }
+
   return (
     <div
       ref={rootRef}
+      data-immersive-scrollbar="true"
       className={className}
       onPointerDown={handleTrackPointerDown}
       onPointerEnter={() => setIsHovered(true)}

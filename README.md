@@ -1,57 +1,55 @@
-# immersive-scroll-video
+# immersive-scroll
 
-A pnpm monorepo for immersive scroll storytelling, frame-sequence tooling, and cross-framework adapters. The public npm surface is a single package, `immersive-scroll`, while the underlying engine and adapter layers stay internal to the workspace.
+A pnpm monorepo for immersive scroll storytelling, frame-sequence tooling, and cross-framework adapters. The public npm surface is a single package, `immersive-scroll`, which now ships the React runtime, adapter entry points, typed controls helpers, and the CLI used to build frame assets.
 
-## Workspace packages
+## What ships
 
-- `immersive-scroll`: public package with React exports at the root and `next`, `solid`, and `web` subpath entry points.
-- `@immersive-scroll/shared`: internal shared types, config contracts, validators, and small utilities.
-- `@immersive-scroll/core`: internal framework-agnostic engine, renderer lifecycle, stores, progress control, and plugin orchestration.
-- `@immersive-scroll/react`: internal React adapter layer used by the public package.
-- `@immersive-scroll/next`: internal Next.js client wrapper layer used by the public package.
-- `@immersive-scroll/solid`: internal Solid adapter layer used by the public package.
-- `@immersive-scroll/web`: internal imperative DOM adapter used by the public package.
-- `@immersive-scroll/cli`: internal frame extraction, hashing, manifest, repair, validation, and diagnostics tooling.
+- `immersive-scroll`: public package with React exports at the root plus `next`, `solid`, and `web` subpath entry points.
+- `immersive-scroll` CLI: bundled frame extraction, validation, repair, manifest, hash, and diagnostics tooling.
+- `examples/next-demo`: the primary docs, demo, and playground surface with the shared mobile-first shell.
+- Internal workspace packages under `packages/` that keep the engine, adapters, shared types, and CLI implementation organized for future expansion.
 
 More detail for each package lives in [packages/README.md](packages/README.md).
 
-## Repository map
+## Quick start
 
-- [packages/](packages/README.md): publishable packages and their source layout.
-- [examples/](examples/README.md): Next.js demo plus React, Solid, and vanilla runtime examples.
-- [docs/](docs/README.md): written guides, API notes, architecture references, and troubleshooting docs.
-- [scripts/](scripts/README.md): workspace build, clean, typecheck, test, and asset preparation scripts.
-- [tests/](tests/README.md): unit, integration, e2e, fixtures, and setup coverage.
-- [.github/](.github/README.md): GitHub Actions workflows plus release requirements.
-- [.changeset/](.changeset/README.md): versioning metadata used by the release workflow.
-
-## Local development
+Install the package, then build a frame set:
 
 ```bash
-pnpm install
-pnpm ci:verify
+pnpm add immersive-scroll gsap
+npx immersive-scroll extract ./assets/story.mp4 ./public/immersive/story --clean
 ```
 
-Useful commands:
+Inside this repo, the shortest asset path is:
 
 ```bash
-pnpm dev:landing
-pnpm prepare:example-assets
-pnpm changeset
+pnpm extract "./examples/assets/wildrobot.mp4"
 ```
 
-## Quick usage
-
-### React
+That wrapper auto-selects `24` or `30` fps, converts to WebP, and rewrites every example app to the shared `/immersive/scene` asset folder.
+Long clips are automatically capped to roughly `250` frames, scaled to landing-page dimensions, and tuned for WebP size/quality so a multi-minute source does not explode into thousands of frames.
 
 ```tsx
-import { ImmersiveLayer, ImmersiveScroll } from 'immersive-scroll';
+import {
+  ImmersiveLayer,
+  ImmersiveScroll,
+  useImmersiveConfigControls
+} from 'immersive-scroll';
 
 export function HeroStory() {
+  const controls = useImmersiveConfigControls({
+    initialConfig: {
+      visual: { objectFit: 'cover' },
+      scrollbar: { enabled: true, visibilityMode: 'manual' }
+    }
+  });
+
   return (
     <ImmersiveScroll
-      framesPath="/immersive/hero"
-      config={{ scrollbar: { enabled: true, visibilityMode: 'manual' } }}
+      framesPath="/immersive/story"
+      viewportProps={{ position: 'sticky', top: 0 }}
+      mediaProps={{ position: 'absolute', inset: 0 }}
+      config={controls.config}
       overlay={<ImmersiveLayer>Scene chrome</ImmersiveLayer>}
     >
       <section>Foreground story content</section>
@@ -60,13 +58,31 @@ export function HeroStory() {
 }
 ```
 
-### Other entry points
+## Local development
 
-```ts
-import { NextImmersiveScroll } from 'immersive-scroll/next';
-import { ImmersiveScroll as SolidImmersiveScroll } from 'immersive-scroll/solid';
-import { createImmersiveInstance } from 'immersive-scroll/web';
+```bash
+pnpm install
+pnpm dev:landing
+pnpm ci:verify
 ```
+
+Useful commands:
+
+```bash
+pnpm prepare:example-assets
+pnpm extract "./examples/assets/wildrobot.mp4"
+pnpm changeset
+```
+
+## Repository map
+
+- [packages/](packages/README.md): publishable packages and their source layout.
+- [examples/](examples/README.md): Next.js docs/demo/playground plus React, Solid, and vanilla runtime examples.
+- [docs/](docs/README.md): written guides, API notes, architecture references, and troubleshooting docs.
+- [scripts/](scripts/README.md): workspace build, clean, typecheck, test, and asset preparation scripts.
+- [tests/](tests/README.md): unit, integration, e2e, fixtures, and setup coverage.
+- [.github/](.github/README.md): GitHub Actions workflows plus release requirements.
+- [.changeset/](.changeset/README.md): versioning metadata used by the release workflow.
 
 ## Release flow
 

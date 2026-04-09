@@ -9,6 +9,31 @@ import type {
 } from '@immersive-scroll/core';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 
+export type ImmersiveLayoutPosition = Extract<
+  NonNullable<CSSProperties['position']>,
+  'absolute' | 'fixed' | 'relative' | 'sticky'
+>;
+
+export interface ImmersivePlacementProps {
+  position?: ImmersiveLayoutPosition;
+  inset?: CSSProperties['inset'];
+  top?: CSSProperties['top'];
+  right?: CSSProperties['right'];
+  bottom?: CSSProperties['bottom'];
+  left?: CSSProperties['left'];
+  zIndex?: CSSProperties['zIndex'];
+}
+
+export interface ImmersiveViewportProps extends ImmersivePlacementProps {
+  className?: string;
+  style?: CSSProperties;
+}
+
+export interface ImmersiveMediaProps extends ImmersivePlacementProps {
+  className?: string;
+  style?: CSSProperties;
+}
+
 export interface ImmersiveScrollbarPlacementProps {
   position?: ScrollbarConfig['position'];
   positionMode?: ScrollbarConfig['positionMode'];
@@ -44,6 +69,8 @@ export interface ImmersiveScrollProps {
   errorFallback?: ReactNode;
   overlay?: ReactNode;
   scrollbarProps?: ImmersiveScrollbarProps;
+  viewportProps?: ImmersiveViewportProps;
+  mediaProps?: ImmersiveMediaProps;
 }
 
 export interface ImmersiveContextValue {

@@ -1,7 +1,5 @@
 import type { DeepPartial } from '../types/utility';
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+import { isObject } from './isObject';
 
 export function deepMerge<TValue>(
   base: TValue,
@@ -11,7 +9,7 @@ export function deepMerge<TValue>(
     return structuredClone(base);
   }
 
-  if (!isRecord(base) || !isRecord(override)) {
+  if (!isObject(base) || !isObject(override)) {
     return override as TValue;
   }
 
@@ -25,7 +23,7 @@ export function deepMerge<TValue>(
       continue;
     }
 
-    if (isRecord(current) && isRecord(value)) {
+    if (isObject(current) && isObject(value)) {
       output[key] = deepMerge(current, value);
       continue;
     }

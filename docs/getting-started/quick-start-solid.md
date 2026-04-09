@@ -5,7 +5,7 @@ import { ImmersiveScroll } from 'immersive-scroll/solid';
 
 export function Hero() {
   return (
-    <ImmersiveScroll framesPath="/immersive/ocean">Solid story</ImmersiveScroll>
+    <ImmersiveScroll framesPath="/immersive/scene">Solid story</ImmersiveScroll>
   );
 }
 ```

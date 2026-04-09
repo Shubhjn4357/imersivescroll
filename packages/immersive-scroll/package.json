@@ -16,8 +16,12 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "immersive-scroll": "./bin/immersive-scroll.js"
+  },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
   "exports": {
     ".": {
@@ -51,6 +55,7 @@
     "typecheck": "node -e \"process.exit(0)\""
   },
   "dependencies": {
+    "@immersive-scroll/cli": "workspace:^",
     "@immersive-scroll/next": "workspace:^",
     "@immersive-scroll/react": "workspace:^",
     "@immersive-scroll/solid": "workspace:^",

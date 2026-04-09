@@ -36,7 +36,7 @@ export const docsQuickstartSnippets: readonly CodeSnippet[] = [
     eyebrow: 'Install',
     title: 'Add the public package and motion layer.',
     description:
-      'The root package exports the React surface. GSAP is optional, but it is the intended companion for premium section choreography.',
+      'The root package exports the React surface, shared config helpers, and the CLI. GSAP stays optional, but it is the intended companion for premium section choreography.',
     language: 'bash',
     code: `pnpm add immersive-scroll gsap`
   },
@@ -44,17 +44,17 @@ export const docsQuickstartSnippets: readonly CodeSnippet[] = [
     eyebrow: 'First render',
     title: 'Mount the immersive surface with a frame sequence.',
     description:
-      'Use a public frame directory plus the generated manifest. The overlay stays separate from the story content so you can evolve them independently.',
+      'Use a public frame directory plus the generated manifest. The overlay stays separate from the story content so you can evolve them independently, and placement props keep the viewport/media layer configurable.',
     language: 'tsx',
-    code: `'use client';\n\nimport {\n  ImmersiveLayer,\n  ImmersiveScroll,\n  useImmersiveFrame,\n  useImmersiveProgress\n} from 'immersive-scroll';\n\nfunction SceneStatus() {\n  const frame = useImmersiveFrame();\n  const { progress } = useImmersiveProgress();\n\n  return (\n    <div>\n      <span>Progress {Math.round(progress * 100)}%</span>\n      <span>Frame {frame.currentFrame + 1}</span>\n    </div>\n  );\n}\n\nexport function ProductHero() {\n  return (\n    <ImmersiveScroll\n      framesPath=\"/immersive/launch\"\n      config={{\n        visual: { objectFit: 'cover' },\n        scrollbar: { enabled: true, visibilityMode: 'manual' }\n      }}\n      overlay={\n        <ImmersiveLayer>\n          <SceneStatus />\n        </ImmersiveLayer>\n      }\n    >\n      <section>{/* story panels */}</section>\n    </ImmersiveScroll>\n  );\n}`
+    code: `'use client';\n\nimport {\n  ImmersiveLayer,\n  ImmersiveScroll,\n  useImmersiveConfigControls,\n  useImmersiveFrame,\n  useImmersiveProgress\n} from 'immersive-scroll';\n\nfunction SceneStatus() {\n  const frame = useImmersiveFrame();\n  const { progress } = useImmersiveProgress();\n\n  return (\n    <div>\n      <span>Progress {Math.round(progress * 100)}%</span>\n      <span>Frame {frame.currentFrame + 1}</span>\n    </div>\n  );\n}\n\nexport function ProductHero() {\n  const controls = useImmersiveConfigControls({\n    initialConfig: {\n      visual: { objectFit: 'cover' },\n      scrollbar: { enabled: true, visibilityMode: 'manual' }\n    }\n  });\n\n  return (\n    <ImmersiveScroll\n      framesPath=\"/immersive/launch\"\n      viewportProps={{ position: 'sticky', top: 0 }}\n      mediaProps={{ position: 'absolute', inset: 0 }}\n      config={controls.config}\n      overlay={\n        <ImmersiveLayer>\n          <SceneStatus />\n        </ImmersiveLayer>\n      }\n    >\n      <section>{/* story panels */}</section>\n    </ImmersiveScroll>\n  );\n}`
   },
   {
     eyebrow: 'Asset prep',
     title: 'Generate frames and a manifest from source video.',
     description:
-      'The CLI path keeps frame names and manifest metadata deterministic, which is what the runtime and playground consume.',
+      'The repo wrapper auto-selects 24 or 30 fps, converts to WebP, and rewrites the shared example scene that the docs, demo, and playground all consume.',
     language: 'bash',
-    code: `pnpm prepare:example-assets`
+    code: `pnpm extract "./examples/assets/your-clip.mp4"`
   }
 ] as const;
 
@@ -113,6 +113,12 @@ export const componentReferenceSections: readonly ReferenceSection[] = [
         description:
           'Per-instance scrollbar visibility, placement, interactivity, and style overrides layered on top of the shared scrollbar config.',
         defaultValue: 'undefined'
+      },
+      {
+        name: 'viewportProps / mediaProps',
+        type: 'ImmersiveViewportProps / ImmersiveMediaProps',
+        description:
+          'Placement and style props for the pinned viewport wrapper and the media surface itself. Use these to switch between sticky, fixed, absolute, or custom offsets without editing internal markup.'
       },
       {
         name: 'children',
@@ -267,6 +273,21 @@ export const hookReferenceItems: readonly HookReference[] = [
       'Useful when you want a design-system-native scrollbar shell outside the packaged component.',
       'Returns already-resolved values from the merged config.',
       'Includes `scrollToProgress()` so custom scrollbar UIs can drive the scene.'
+    ]
+  },
+  {
+    name: 'useImmersiveConfigControls',
+    signature:
+      'const controls = useImmersiveConfigControls({ initialConfig? })',
+    description:
+      'Creates typed config state and section-level patch helpers for debug toolbars, route knobs, and preview controls.',
+    returns:
+      '{ config, mergeConfig, replaceConfig, updateScroll, updateTrigger, updateVisual, updateScrollbar, updateMobile, updateEvents, updateDebug, resetConfig }',
+    usage: `const controls = useImmersiveConfigControls({\n  initialConfig: {\n    debug: { enabled: false },\n    scrollbar: { enabled: true, visibilityMode: 'manual' }\n  }\n});\n\ncontrols.updateVisual({ objectFit: 'contain' });\ncontrols.updateScrollbar({ positionMode: 'fixed' });`,
+    notes: [
+      'Useful when a route owns scene controls outside the immersive provider itself.',
+      'Patches nested config safely without hand-writing deep state updates.',
+      'This is the same hook used by the shared demo and playground surfaces.'
     ]
   },
   {
@@ -544,12 +565,17 @@ export const docsOperationalCards: readonly LandingCard[] = [
   {
     title: 'Fallback strategy',
     description:
-      'Expose a static poster or shortened scene for reduced-motion users and small mobile screens.'
+      'Expose a static poster or shortened scene for reduced-motion users and small mobile screens, then let the surrounding layout stack cleanly.'
   },
   {
     title: 'Source discipline',
     description:
       'Use one design source for landing copy, docs copy, and adapter demos so product changes stay aligned.'
+  },
+  {
+    title: 'Layout discipline',
+    description:
+      'Build the route shell mobile-first with grid and flex, then widen the immersive chrome at larger breakpoints instead of shrinking a desktop layout later.'
   }
 ] as const;
 

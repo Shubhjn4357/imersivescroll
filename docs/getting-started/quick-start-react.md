@@ -6,7 +6,7 @@ import { ImmersiveLayer, ImmersiveScroll } from 'immersive-scroll';
 export function Hero() {
   return (
     <ImmersiveScroll
-      framesPath="/immersive/ocean"
+      framesPath="/immersive/scene"
       overlay={<ImmersiveLayer className="hero-overlay" />}
       config={{ scrollbar: { enabled: true } }}
     >
@@ -16,4 +16,4 @@ export function Hero() {
 }
 ```
 
-Use `pnpm prepare:example-assets` first so `/immersive/ocean/manifest.json` exists in your app's public folder.
+Use `pnpm extract "<video-path>"` first so `/immersive/scene/manifest.json` exists in your app's public folder.

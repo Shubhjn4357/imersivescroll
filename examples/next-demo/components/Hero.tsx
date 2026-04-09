@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useImmersiveConfigControls } from 'immersive-scroll';
 import {
   nextDemoNavigationLinks,
   nextLandingActions,
@@ -13,8 +13,21 @@ interface HeroProps {
 }
 
 export function Hero({ runtimeLabel = 'Next.js Demo' }: HeroProps) {
-  const [showDebug, setShowDebug] = useState(false);
-  const [showScrollbar, setShowScrollbar] = useState(true);
+  const sceneControls = useImmersiveConfigControls({
+    initialConfig: {
+      debug: { enabled: false },
+      scrollbar: {
+        enabled: true,
+        positionMode: 'absolute'
+      }
+    }
+  });
+  const showDebug = sceneControls.config.debug?.enabled ?? false;
+  const showScrollbar = sceneControls.config.scrollbar?.enabled ?? true;
+  const scrollbarPositionMode =
+    sceneControls.config.scrollbar?.positionMode === 'fixed'
+      ? 'fixed'
+      : 'absolute';
 
   return (
     <ImmersiveLanding
@@ -25,8 +38,23 @@ export function Hero({ runtimeLabel = 'Next.js Demo' }: HeroProps) {
       runtimeLabel={runtimeLabel}
       showDebug={showDebug}
       showScrollbar={showScrollbar}
-      onToggleDebug={() => setShowDebug((value) => !value)}
-      onToggleScrollbar={() => setShowScrollbar((value) => !value)}
+      scrollbarPositionMode={scrollbarPositionMode}
+      onToggleDebug={() =>
+        sceneControls.updateDebug({
+          enabled: !showDebug
+        })
+      }
+      onToggleScrollbar={() =>
+        sceneControls.updateScrollbar({
+          enabled: !showScrollbar
+        })
+      }
+      onToggleScrollbarPositionMode={() =>
+        sceneControls.updateScrollbar({
+          positionMode:
+            scrollbarPositionMode === 'absolute' ? 'fixed' : 'absolute'
+        })
+      }
       footer={
         <span>
           Run `pnpm dev:landing` to work on the shared landing source in the

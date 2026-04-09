@@ -1,5 +1,6 @@
 import { ImmersiveFloating, ImmersiveScroll } from 'immersive-scroll/solid';
 import {
+  defaultSceneFramesPath,
   landingDocsCards,
   landingFeatureCards,
   landingFrameworkCards,
@@ -22,7 +23,7 @@ export function Hero() {
   return (
     <ImmersiveScroll
       class="immersive-stage"
-      framesPath="/immersive/ocean"
+      framesPath={defaultSceneFramesPath}
       config={solidLandingConfig}
     >
       <div class="story-stack">

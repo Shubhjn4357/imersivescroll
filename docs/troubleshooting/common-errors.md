@@ -10,4 +10,4 @@ Confirm the renderer target exists and the frame URLs resolve in the browser.
 
 ## Demo app starts without visuals
 
-Run `pnpm prepare:example-assets` so the example public folders have real assets.
+Run `pnpm extract "<video-path>"` or `pnpm prepare:example-assets` so the example public folders have real assets.

@@ -9,7 +9,7 @@ import { NextImmersiveScroll } from 'immersive-scroll/next';
 
 export function StoryHero() {
   return (
-    <NextImmersiveScroll framesPath="/immersive/ocean">
+    <NextImmersiveScroll framesPath="/immersive/scene">
       Story copy
     </NextImmersiveScroll>
   );

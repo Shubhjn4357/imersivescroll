@@ -1,5 +1,6 @@
 import { clamp } from '@immersive-scroll/core';
 import { useImmersiveContext } from './useImmersiveContext';
+import { resolveScrollYFromProgress } from '../utils/scrollMetrics';
 
 export function useImmersiveScrollbar() {
   const { config, scroll, containerRef } = useImmersiveContext();
@@ -13,11 +14,11 @@ export function useImmersiveScrollbar() {
       return;
     }
 
-    const containerRect = containerElement.getBoundingClientRect();
-    const containerTop = window.scrollY + containerRect.top;
-    const scrollRange = Math.max(containerRect.height - window.innerHeight, 0);
     const normalizedProgress = clamp(nextProgress, 0, 1);
-    const nextScrollTop = containerTop + scrollRange * normalizedProgress;
+    const nextScrollTop = resolveScrollYFromProgress(
+      normalizedProgress,
+      containerElement
+    );
 
     window.scrollTo({
       top: nextScrollTop,

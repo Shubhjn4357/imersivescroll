@@ -1,0 +1,13 @@
+
+> @immersive-scroll-example/next-demo@0.1.0 dev D:\Code\imersivescroll\examples\next-demo
+> next dev "--hostname" "127.0.0.1" "--port" "3000"
+
+   ▲ Next.js 15.5.14
+   - Local:        http://127.0.0.1:3000
+   - Network:      http://127.0.0.1:3000
+   - Experiments (use with caution):
+     ✓ externalDir
+
+ ✓ Starting...
+ ✓ Ready in 4.1s
+ ELIFECYCLE  Command failed with exit code 3221225786.
