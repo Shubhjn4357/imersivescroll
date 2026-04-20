@@ -9,21 +9,16 @@ import {
   useImmersiveFrame,
   useImmersiveProgress
 } from 'immersive-scroll';
+import { ImmersiveSvgMask } from '@immersive-scroll/svg-mask';
 import {
   defaultSceneFramesPath,
-  defaultLandingActions,
-  defaultLandingDestinationCards,
-  defaultLandingNavigationLinks,
-  landingFeatureCards,
   landingHero,
   landingImmersiveConfig,
-  landingMetrics,
   landingSections,
   landingSource,
-  type DestinationCard,
-  type SiteLink
+  type SiteLink,
+  type DestinationCard
 } from '../landing-content';
-import { CodeBlock } from './CodeBlock';
 import { SceneToolbarButton } from './SceneToolbarButton';
 import { SiteChrome } from './SiteChrome';
 
@@ -38,24 +33,40 @@ export interface ImmersiveLandingProps {
   onToggleScrollbar: () => void;
   onToggleScrollbarPositionMode: () => void;
   footer?: ReactNode;
+  activeHref?: string;
   navigationLinks?: readonly SiteLink[];
   actionLinks?: readonly SiteLink[];
   destinationCards?: readonly DestinationCard[];
-  activeHref?: string;
 }
 
-function HomeSceneStatus() {
+function StatusCard() {
   const frame = useImmersiveFrame();
   const { progress } = useImmersiveProgress();
 
   return (
     <div className="demo-status-card">
-      <strong>Home preview</strong>
-      <span>Progress {Math.round(progress * 100)}%</span>
-      <span>
-        Frame {Math.min(frame.currentFrame + 1, Math.max(frame.totalFrames, 1))}
-        /{Math.max(frame.totalFrames, 1)}
+      <span
+        className="text-accent"
+        style={{ fontSize: '0.7rem', marginBottom: '4px' }}
+      >
+        System Active
       </span>
+      <div style={{ display: 'flex', gap: '20px' }}>
+        <div>
+          <small style={{ color: 'var(--muted)', display: 'block' }}>
+            Progress
+          </small>
+          <strong>{Math.round(progress * 100)}%</strong>
+        </div>
+        <div>
+          <small style={{ color: 'var(--muted)', display: 'block' }}>
+            Frame
+          </small>
+          <strong>
+            {frame.currentFrame} / {frame.totalFrames}
+          </strong>
+        </div>
+      </div>
     </div>
   );
 }
@@ -69,155 +80,294 @@ export function ImmersiveLanding({
   onToggleScrollbar,
   onToggleScrollbarPositionMode,
   footer,
-  navigationLinks = defaultLandingNavigationLinks,
-  actionLinks = defaultLandingActions,
-  destinationCards = defaultLandingDestinationCards,
   activeHref = '/'
 }: ImmersiveLandingProps) {
   const scopeRef = useRef<HTMLElement>(null);
 
   return (
-    <SiteChrome
-      activeHref={activeHref}
-      navigationLinks={navigationLinks}
-      footer={footer}
-    >
-      <main className="home-shell" ref={scopeRef}>
-        <section className="home-hero">
-          <div className="home-hero__copy">
-            <span className="docs-chip">{runtimeLabel}</span>
-            <h1>{landingHero.title}</h1>
-            <p>{landingHero.description}</p>
+    <SiteChrome activeHref={activeHref} footer={footer}>
+      <main
+        className="home-shell"
+        ref={scopeRef}
+        style={{ padding: 0, maxWidth: 'none', position: 'relative' }}
+      >
+        {/* Animated Background Grid */}
+        <div className="site-grid" />
 
-            <div className="docs-inline-list">
-              {actionLinks.map((action) => (
-                <a
-                  className={`site-nav__link${
-                    action.accent ? ' site-nav__link--accent' : ''
-                  }`}
-                  href={action.href}
-                  key={action.href}
-                >
-                  {action.label}
-                </a>
-              ))}
-            </div>
-
-            <div className="docs-inline-list">
-              {landingMetrics.map((metric) => (
-                <span className="docs-chip docs-chip--muted" key={metric.label}>
-                  {metric.label}: {metric.value}
-                </span>
-              ))}
+        {/* Premium Hero Section */}
+        <section
+          className="story-panel story-panel-center"
+          style={{
+            minHeight: '80vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center'
+          }}
+        >
+          <div style={{ maxWidth: '800px', width: '100%', margin: '0 auto' }}>
+            <span className="text-accent">{runtimeLabel} Edition</span>
+            <h1 className="text-hero">{landingHero.title}</h1>
+            <p className="text-subtitle" style={{ margin: '0 auto 2rem' }}>
+              {landingHero.description}
+            </p>
+            <div
+              style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}
+            >
+              <a href="#demo" className="cta-button">
+                Explore Engine
+              </a>
+              <a href="/docs" className="ghost-button">
+                Documentation
+              </a>
             </div>
           </div>
-
-          <aside className="home-hero__aside">
-            <article className="docs-card">
-              <h3>One package, one asset flow</h3>
-              <p>
-                Use the home page for the overall story, the docs for the API,
-                the demo for the live component preview, and the playground for
-                tuning. The same package also ships the CLI that rebuilds the
-                shared frame sequence used across every example surface.
-              </p>
-            </article>
-            <article className="docs-code-card">
-              <div className="docs-code-card__header">
-                <span className="docs-chip">Quick start</span>
-                <h3>Install once, then extract once</h3>
-              </div>
-              <CodeBlock
-                code={`pnpm add immersive-scroll gsap\npnpm extract "./examples/assets/wildrobot.mp4"`}
-                language="bash"
-              />
-            </article>
-          </aside>
         </section>
 
-        <section className="home-preview" id="demo">
-          <div className="docs-section__header">
-            <h2>Live scene preview</h2>
-            <p>
-              The home page keeps one premium scene, but the surrounding UI now
-              behaves like a component site instead of a one-off launch page.
+        {/* Feature Grid with Glassmorphism */}
+        <section
+          style={{
+            padding: '4rem 2rem',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '2rem',
+            maxWidth: '1200px',
+            margin: '0 auto'
+          }}
+        >
+          <article className="docs-card glass-card">
+            <span className="text-accent">01</span>
+            <h3>Exploded View Engine</h3>
+            <p className="text-subtitle" style={{ fontSize: '1rem' }}>
+              Transform complex products into interactive 3D stories with
+              frame-perfect scrubbing.
             </p>
-          </div>
+          </article>
+          <article className="docs-card glass-card">
+            <span className="text-accent">02</span>
+            <h3>Pure Performance</h3>
+            <p className="text-subtitle" style={{ fontSize: '1rem' }}>
+              Hardware-accelerated canvas rendering with intelligent frame
+              preloading and eviction.
+            </p>
+          </article>
+          <article className="docs-card glass-card">
+            <span className="text-accent">03</span>
+            <h3>Cross-Adapter</h3>
+            <p className="text-subtitle" style={{ fontSize: '1rem' }}>
+              Unified engine logic with native adapters for React, Next.js,
+              Solid, and Vanilla Web.
+            </p>
+          </article>
+        </section>
 
-          <div className="demo-preview-frame">
+        {/* SVG Mask Reveal Section */}
+        <section style={{ padding: '0', overflow: 'hidden' }}>
+          <ImmersiveSvgMask
+            scrollDistance={1600}
+            variant="pill"
+            softness={8}
+            parallax={0.2}
+            background={
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#0a0a0a',
+                  color: 'rgba(255,255,255,0.1)',
+                  overflow: 'hidden'
+                }}
+              >
+                <h2
+                  style={{
+                    fontSize: 'clamp(3rem, 12vw, 8rem)',
+                    fontWeight: 900,
+                    textTransform: 'uppercase',
+                    letterSpacing: '-0.05em'
+                  }}
+                >
+                  The Core.
+                </h2>
+              </div>
+            }
+            foreground={
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'linear-gradient(135deg, var(--accent), #002244)',
+                  color: 'white',
+                  textAlign: 'center',
+                  padding: '2rem',
+                  boxSizing: 'border-box',
+                  overflow: 'hidden'
+                }}
+              >
+                <span
+                  className="text-accent"
+                  style={{
+                    color: 'white',
+                    opacity: 0.8,
+                    fontSize: 'clamp(0.6rem, 1.5vw, 0.8rem)',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  Mask Reveal System
+                </span>
+                <h2
+                  className="text-hero"
+                  style={{
+                    fontSize: 'clamp(1.5rem, 3.5vw, 3rem)',
+                    margin: '0 0 1rem',
+                    padding: '0 1rem',
+                    maxWidth: '100%'
+                  }}
+                >
+                  Engineered for Narrative.
+                </h2>
+                <p
+                  className="text-subtitle"
+                  style={{
+                    color: 'white',
+                    maxWidth: '420px',
+                    margin: '0 auto',
+                    padding: '0 1rem',
+                    fontSize: 'clamp(0.85rem, 1vw, 1.1rem)'
+                  }}
+                >
+                  Our standalone reveal system allows you to build complex,
+                  scroll-driven masks without manually managing coordinates.
+                </p>
+              </div>
+            }
+          />
+        </section>
+
+        {/* Main Demo Section */}
+        <section
+          className="home-preview"
+          id="demo"
+          style={{ padding: '8rem 0' }}
+        >
+          <div
+            className="demo-preview-frame"
+            style={{ width: '90vw', margin: '0 auto', position: 'relative' }}
+          >
             <ImmersiveScroll
               className="demo-scene"
               config={{
                 ...landingImmersiveConfig,
-                debug: {
-                  ...landingImmersiveConfig.debug,
-                  enabled: showDebug
-                },
+                debug: { enabled: showDebug },
                 scrollbar: {
-                  ...landingImmersiveConfig.scrollbar,
                   enabled: showScrollbar,
                   positionMode: scrollbarPositionMode
                 }
               }}
+              viewportProps={{ position: 'sticky', top: 0 }}
               framesPath={defaultSceneFramesPath}
-              scrollbarProps={{
-                visible: showScrollbar,
-                positionMode: scrollbarPositionMode,
-                right: scrollbarPositionMode === 'absolute' ? 18 : 24,
-                top: scrollbarPositionMode === 'absolute' ? 18 : 96,
-                bottom: scrollbarPositionMode === 'absolute' ? 18 : 28
-              }}
               overlay={
                 <ImmersiveLayer className="immersive-overlay">
-                  <div className="landing-vignette demo-scene__vignette" />
-                  <div className="demo-toolbar">
+                  <div className="landing-vignette" />
+
+                  {/* Toolbar */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '2rem',
+                      right: '2rem',
+                      display: 'flex',
+                      gap: '0.5rem',
+                      pointerEvents: 'auto'
+                    }}
+                  >
                     <SceneToolbarButton
                       active={showDebug}
                       icon={Bug}
-                      label={showDebug ? 'Hide debug' : 'Show debug'}
+                      label="Debug"
                       onClick={onToggleDebug}
                     />
                     <SceneToolbarButton
                       active={showScrollbar}
                       icon={PanelRightDashed}
-                      label={
-                        showScrollbar ? 'Hide scrollbar' : 'Show scrollbar'
-                      }
+                      label="Scroll"
                       onClick={onToggleScrollbar}
                     />
                     <SceneToolbarButton
                       active={scrollbarPositionMode === 'fixed'}
                       icon={Pin}
-                      label={
-                        scrollbarPositionMode === 'fixed'
-                          ? 'Rail: fixed'
-                          : 'Rail: absolute'
-                      }
+                      label="Pin"
                       onClick={onToggleScrollbarPositionMode}
                     />
                   </div>
-                  <HomeSceneStatus />
-                  <div className="demo-source-card">
-                    <strong>{landingSource.title}</strong>
-                    <span>{landingSource.label}</span>
-                    <span>{landingSource.license}</span>
+
+                  {/* Status Overlay */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '2rem',
+                      left: '2rem',
+                      pointerEvents: 'auto'
+                    }}
+                  >
+                    <StatusCard />
+                  </div>
+
+                  {/* Source Attribution */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '2rem',
+                      right: '2rem',
+                      textAlign: 'right'
+                    }}
+                  >
+                    <small className="text-muted" style={{ opacity: 0.6 }}>
+                      ENGINE v0.1.1
+                    </small>
+                    <p style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                      {landingSource.title}
+                    </p>
                   </div>
                 </ImmersiveLayer>
               }
             >
+              {/* Narrative Panels inside the Scroll Area */}
               <div className="demo-scene__content">
-                {landingSections.slice(0, 2).map((section) => (
+                {landingSections.map((section) => (
                   <section
-                    className={`story-panel story-panel--${section.align} story-panel--compact`}
+                    className={`story-panel story-panel--${section.align}`}
                     key={section.id}
                   >
                     <article
-                      className="story-card story-card--compact"
-                      data-align={section.align}
+                      className="story-card glass-card"
+                      style={{
+                        maxWidth: '420px',
+                        background: 'rgba(5,5,5,0.4)'
+                      }}
                     >
-                      <p className="eyebrow">{section.eyebrow}</p>
-                      <h2>{section.title}</h2>
-                      <p>{section.description}</p>
+                      <span
+                        className="text-accent"
+                        style={{ fontSize: '0.7rem' }}
+                      >
+                        {section.eyebrow}
+                      </span>
+                      <h2 style={{ fontSize: '2.25rem', margin: '0.75rem 0' }}>
+                        {section.title}
+                      </h2>
+                      <p
+                        className="text-subtitle"
+                        style={{ fontSize: '1.05rem' }}
+                      >
+                        {section.description}
+                      </p>
                     </article>
                   </section>
                 ))}
@@ -226,44 +376,25 @@ export function ImmersiveLanding({
           </div>
         </section>
 
-        <section className="home-grid">
-          <div className="docs-section__header">
-            <h2>Start from the right page</h2>
-            <p>
-              Each route exists for a different job, so the package site reads
-              more like product documentation and less like a single landing.
-            </p>
-          </div>
-
-          <div className="docs-card-grid">
-            {destinationCards.map((card) => (
-              <a className="docs-card" href={card.href} key={card.title}>
-                <span className="docs-chip">{card.eyebrow}</span>
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        <section className="home-grid" id="features">
-          <div className="docs-section__header">
-            <h2>Feature highlights</h2>
-            <p>
-              The package handles the parts that usually become inconsistent
-              first: frame scrubbing, overlays, custom chrome, and adapter
-              parity.
-            </p>
-          </div>
-
-          <div className="docs-card-grid">
-            {landingFeatureCards.map((featureCard) => (
-              <article className="docs-card" key={featureCard.title}>
-                <h3>{featureCard.title}</h3>
-                <p>{featureCard.description}</p>
-              </article>
-            ))}
-          </div>
+        {/* Footer Info */}
+        <section
+          style={{
+            padding: '8rem 2rem',
+            textAlign: 'center',
+            borderTop: '1px solid var(--border)'
+          }}
+        >
+          <h2 className="text-title">Ready to build?</h2>
+          <p className="text-subtitle" style={{ margin: '0 auto 2rem' }}>
+            Start creating cinematic scroll experiences today with our CLI and
+            framework adapters.
+          </p>
+          <a
+            href="https://github.com/Shubhjn4357/imersivescroll"
+            className="cta-button"
+          >
+            View on GitHub
+          </a>
         </section>
       </main>
     </SiteChrome>

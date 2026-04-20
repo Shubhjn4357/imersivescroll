@@ -221,6 +221,42 @@ export const componentReferenceSections: readonly ReferenceSection[] = [
           'Activates content or callbacks inside a normalized 0..1 progress segment without reaching for GSAP.'
       }
     ]
+  },
+  {
+    eyebrow: 'Secondary Component',
+    title: '<ImmersiveSvgMask />',
+    description:
+      'A hardware-accelerated, scroll-driven reveal mask component using native CSS mask-image and GSAP scrubbing. Renders a cinematic foreground over a static background.',
+    properties: [
+      {
+        name: 'background',
+        type: 'ReactNode',
+        description:
+          'The static base layer (often a dark, mysterious starting state).',
+        required: true
+      },
+      {
+        name: 'foreground',
+        type: 'ReactNode',
+        description:
+          'The vibrant "after" layer that gets revealed as the user scrolls.',
+        required: true
+      },
+      {
+        name: 'scrollDistance',
+        type: 'number',
+        description:
+          'Amount of scroll travel in pixels before the mask fully covers the screen.',
+        defaultValue: '2000'
+      },
+      {
+        name: 'pin',
+        type: 'boolean',
+        description:
+          'Enables or disables GSAP viewport pinning during the reveal animation.',
+        defaultValue: 'true'
+      }
+    ]
   }
 ] as const;
 

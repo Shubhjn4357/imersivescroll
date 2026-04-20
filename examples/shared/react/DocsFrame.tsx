@@ -1,5 +1,5 @@
-'use client';
-
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { SiteLink } from '../landing-content';
 import { SiteChrome } from './SiteChrome';
@@ -37,6 +37,8 @@ export function DocsFrame({
   sectionLinks,
   children
 }: DocsFrameProps) {
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
   const resolvedSectionLinks =
     sectionLinks ??
     sidebarGroups.flatMap((group) =>
@@ -45,6 +47,8 @@ export function DocsFrame({
         href: link.href
       }))
     );
+
+  const toggleMobileNav = () => setIsMobileNavOpen(!isMobileNavOpen);
 
   return (
     <SiteChrome activeHref={activeHref} navigationLinks={navigationLinks}>
@@ -106,6 +110,49 @@ export function DocsFrame({
           </div>
         </aside>
       </main>
+
+      {/* Mobile Nav Trigger */}
+      <div className="docs-mobile-nav">
+        <button className="mobile-menu-trigger" onClick={toggleMobileNav}>
+          {isMobileNavOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Drawer */}
+      <div
+        className={`mobile-drawer ${isMobileNavOpen ? 'mobile-drawer--open' : ''}`}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+          {sidebarGroups.map((group) => (
+            <section key={`mobile-${group.title}`}>
+              <p className="docs-sidebar__title">{group.title}</p>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}
+              >
+                {group.links.map((link) => (
+                  <a
+                    href={link.href}
+                    key={`mobile-${link.href}`}
+                    style={{
+                      fontSize: '1.25rem',
+                      color: '#fff',
+                      textDecoration: 'none',
+                      fontWeight: 600
+                    }}
+                    onClick={() => setIsMobileNavOpen(false)}
+                  >
+                    {link.title}
+                  </a>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
     </SiteChrome>
   );
 }

@@ -98,25 +98,28 @@ export function DocsPage() {
         </div>
 
         <div className="docs-card-grid">
-          <article className="docs-card">
-            <h3>What it solves</h3>
-            <p>
+          <article className="docs-card glass-card">
+            <span className="docs-chip">Logic</span>
+            <h3 style={{ margin: '1rem 0' }}>What it solves</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>
               It removes the fragile part of scroll-cinema builds: frame
               loading, progress mapping, viewport pinning, packaged scrollbar
               chrome, and reusable UI state.
             </p>
           </article>
-          <article className="docs-card">
-            <h3>What you still own</h3>
-            <p>
+          <article className="docs-card glass-card">
+            <span className="docs-chip">Ownership</span>
+            <h3 style={{ margin: '1rem 0' }}>What you still own</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>
               You still control the art direction, story layout, overlay design,
               responsive page shell, and the route-level content around the
               scene.
             </p>
           </article>
-          <article className="docs-card">
-            <h3>How to think about it</h3>
-            <p>
+          <article className="docs-card glass-card">
+            <span className="docs-chip">Mindset</span>
+            <h3 style={{ margin: '1rem 0' }}>How to think about it</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>
               Treat the immersive scene like any other component: install it,
               extract assets once, pass typed props, and read state from hooks
               instead of patching internals.
@@ -139,11 +142,22 @@ export function DocsPage() {
 
         <div className="docs-code-grid">
           {docsQuickstartSnippets.map((snippet) => (
-            <article className="docs-code-card" key={snippet.title}>
-              <div className="docs-code-card__header">
+            <article
+              className="docs-code-card glass-card"
+              key={snippet.title}
+              style={{ padding: '1.5rem' }}
+            >
+              <div
+                className="docs-code-card__header"
+                style={{ marginBottom: '1.5rem' }}
+              >
                 <span className="docs-chip">{snippet.eyebrow}</span>
-                <h3>{snippet.title}</h3>
-                <p>{snippet.description}</p>
+                <h3 style={{ fontSize: '1.25rem', margin: '0.75rem 0' }}>
+                  {snippet.title}
+                </h3>
+                <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
+                  {snippet.description}
+                </p>
               </div>
               <CodeBlock code={snippet.code} language={snippet.language} />
             </article>
@@ -155,9 +169,31 @@ export function DocsPage() {
         <div className="docs-section__header">
           <h2>Usage flow</h2>
           <p>
-            The easiest way to avoid implementation drift is to follow the same
-            order every time.
+            The ecosystem provides two primary tools: the core immersive scroll
+            engine, and the cinematic SVG reveal mask. Combine them to build
+            high-end product surfaces.
           </p>
+        </div>
+
+        <div className="docs-card-grid" style={{ marginBottom: '3rem' }}>
+          <article className="docs-card glass-card">
+            <span className="docs-chip">Core Package</span>
+            <h3 style={{ margin: '1rem 0' }}>immersive-scroll</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
+              Used for the heavy lifting: unpacking huge frame sequences,
+              spinning up WebGL canvases, mapping scroll state, and
+              orchestrating the actual hardware scrubbing loop.
+            </p>
+          </article>
+          <article className="docs-card glass-card">
+            <span className="docs-chip">Secondary Package</span>
+            <h3 style={{ margin: '1rem 0' }}>@immersive-scroll/svg-mask</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
+              A lightweight, GSAP-driven reveal mask. Perfect for "before/after"
+              shots or transitioning from a dark preamble into a vibrant feature
+              section without needing thousands of image frames.
+            </p>
+          </article>
         </div>
 
         <ol className="docs-step-list">
@@ -167,15 +203,14 @@ export function DocsPage() {
             is <code>pnpm extract &quot;./video.mp4&quot;</code>.
           </li>
           <li>
-            Mount <code>{'<ImmersiveScroll />'}</code> with{' '}
-            <code>framesPath</code> and only the config you actually need. Reach
-            for <code>viewportProps</code> or <code>mediaProps</code> only when
-            you want something other than the default fixed full-screen scene.
+            Build transition zones using <code>{'<ImmersiveSvgMask />'}</code>{' '}
+            to elegantly pull the user from a standard webpage shell into the
+            immersive format.
           </li>
           <li>
-            Add overlay UI through <code>{'<ImmersiveLayer />'}</code> and read
-            state through hooks like <code>useImmersiveProgress()</code> or{' '}
-            <code>useImmersiveFrame()</code>.
+            Mount <code>{'<ImmersiveScroll />'}</code> for the main act. Bind
+            overlay UI through <code>{'<ImmersiveLayer />'}</code> and read
+            state through hooks like <code>useImmersiveProgress()</code>.
           </li>
           <li>
             Tune the scrollbar, filters, and motion choreography after the base
@@ -194,15 +229,32 @@ export function DocsPage() {
           </p>
         </div>
 
-        <div className="docs-stack">
+        <div
+          className="docs-stack"
+          style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}
+        >
           {componentReferenceSections.map((section) => (
-            <article className="docs-card docs-card--wide" key={section.title}>
-              <div className="docs-card__header">
+            <article
+              className="docs-card docs-card--wide glass-card"
+              key={section.title}
+              style={{ padding: '0', overflow: 'hidden' }}
+            >
+              <div
+                className="docs-card__header"
+                style={{
+                  padding: '2.5rem',
+                  borderBottom: '1px solid var(--border)'
+                }}
+              >
                 <span className="docs-chip">{section.eyebrow}</span>
-                <h3>{section.title}</h3>
-                <p>{section.description}</p>
+                <h3 style={{ fontSize: '1.75rem', margin: '0.75rem 0' }}>
+                  {section.title}
+                </h3>
+                <p style={{ color: 'var(--muted)' }}>{section.description}</p>
               </div>
-              <PropertyTable items={section.properties} />
+              <div style={{ padding: '1rem 0' }}>
+                <PropertyTable items={section.properties} />
+              </div>
             </article>
           ))}
         </div>
@@ -219,19 +271,33 @@ export function DocsPage() {
 
         <div className="docs-card-grid">
           {hookReferenceItems.map((hook) => (
-            <article className="docs-card docs-card--code" key={hook.name}>
+            <article
+              className="docs-card docs-card--code glass-card"
+              key={hook.name}
+            >
               <div className="docs-card__header">
                 <h3>{hook.name}</h3>
-                <p>{hook.description}</p>
+                <p
+                  style={{
+                    color: 'var(--muted)',
+                    fontSize: '0.9rem',
+                    marginBottom: '1rem'
+                  }}
+                >
+                  {hook.description}
+                </p>
               </div>
-              <div className="docs-inline-list">
+              <div
+                className="docs-inline-list"
+                style={{ marginBottom: '1rem' }}
+              >
                 <span className="docs-chip">{hook.signature}</span>
                 <span className="docs-chip docs-chip--muted">
                   {hook.returns}
                 </span>
               </div>
               <CodeBlock code={hook.usage} language="tsx" />
-              <div className="docs-inline-list">
+              <div className="docs-inline-list" style={{ marginTop: '1rem' }}>
                 {hook.notes.map((note) => (
                   <span className="docs-chip docs-chip--muted" key={note}>
                     {note}
@@ -253,15 +319,32 @@ export function DocsPage() {
           </p>
         </div>
 
-        <div className="docs-stack">
+        <div
+          className="docs-stack"
+          style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}
+        >
           {configReferenceSections.map((section) => (
-            <article className="docs-card docs-card--wide" key={section.title}>
-              <div className="docs-card__header">
+            <article
+              className="docs-card docs-card--wide glass-card"
+              key={section.title}
+              style={{ padding: '0', overflow: 'hidden' }}
+            >
+              <div
+                className="docs-card__header"
+                style={{
+                  padding: '2.5rem',
+                  borderBottom: '1px solid var(--border)'
+                }}
+              >
                 <span className="docs-chip">{section.eyebrow}</span>
-                <h3>{section.title}</h3>
-                <p>{section.description}</p>
+                <h3 style={{ fontSize: '1.75rem', margin: '0.75rem 0' }}>
+                  {section.title}
+                </h3>
+                <p style={{ color: 'var(--muted)' }}>{section.description}</p>
               </div>
-              <PropertyTable items={section.properties} />
+              <div style={{ padding: '1rem 0' }}>
+                <PropertyTable items={section.properties} />
+              </div>
             </article>
           ))}
         </div>
@@ -309,9 +392,11 @@ export function DocsPage() {
 
         <div className="docs-card-grid">
           {docsOperationalCards.map((card) => (
-            <article className="docs-card" key={card.title}>
-              <h3>{card.title}</h3>
-              <p>{card.description}</p>
+            <article className="docs-card glass-card" key={card.title}>
+              <h3 style={{ marginBottom: '1rem' }}>{card.title}</h3>
+              <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>
+                {card.description}
+              </p>
             </article>
           ))}
         </div>

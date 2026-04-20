@@ -1,93 +1,116 @@
+'use client';
+
 import type { ReactNode } from 'react';
-import { MoonStar, SunMedium } from 'lucide-react';
 import type { SiteLink } from '../landing-content';
-import { useSiteTheme } from './SiteThemeProvider';
+import '../landing.css';
 
 export interface SiteChromeProps {
   activeHref: string;
-  navigationLinks: readonly SiteLink[];
   children: ReactNode;
   footer?: ReactNode;
+  navigationLinks?: readonly SiteLink[];
 }
 
-export function SiteChrome({
-  activeHref,
-  navigationLinks,
-  children,
-  footer
-}: SiteChromeProps) {
-  const { theme, toggleTheme } = useSiteTheme();
-
+export function SiteChrome({ activeHref, children, footer }: SiteChromeProps) {
   return (
     <div className="site-chrome">
-      <div className="site-backdrop" aria-hidden="true">
-        <div className="site-orb site-orb--one" data-reveal="float" />
-        <div className="site-orb site-orb--two" data-reveal="float" />
-        <div className="site-orb site-orb--three" data-reveal="float" />
-        <div className="site-grid" />
-      </div>
-
       <header className="site-nav">
         <a className="site-brand" href="/">
-          <span className="site-brand__eyebrow">Immersive Scroll</span>
+          <span
+            className="text-accent"
+            style={{ fontSize: '0.65rem', margin: 0 }}
+          >
+            IMMERSIBLE SCROLL
+          </span>
           <strong>immersive-scroll</strong>
         </a>
 
-        <div className="site-nav__controls">
-          <nav className="site-nav__links" aria-label="Primary">
-            {navigationLinks.map((link) => {
-              const isActive = activeHref === link.href;
-
-              return (
-                <a
-                  key={link.href}
-                  className={`site-nav__link${
-                    isActive ? ' site-nav__link--active' : ''
-                  }${link.accent ? ' site-nav__link--accent' : ''}`}
-                  href={link.href}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
+        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+          <nav style={{ display: 'flex', gap: '1.5rem' }}>
+            <a
+              href="/"
+              className={activeHref === '/' ? 'text-accent' : ''}
+              style={{
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                textDecoration: 'none',
+                color: 'inherit'
+              }}
+            >
+              Home
+            </a>
+            <a
+              href="/docs"
+              className={activeHref === '/docs' ? 'text-accent' : ''}
+              style={{
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                textDecoration: 'none',
+                color: 'inherit'
+              }}
+            >
+              Docs
+            </a>
+            <a
+              href="/playground"
+              className={activeHref === '/playground' ? 'text-accent' : ''}
+              style={{
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                textDecoration: 'none',
+                color: 'inherit'
+              }}
+            >
+              Playground
+            </a>
           </nav>
 
-          <button
-            aria-label={
-              theme === 'dark'
-                ? 'Switch to light theme'
-                : 'Switch to dark theme'
-            }
-            className="icon-button"
-            type="button"
-            onClick={toggleTheme}
+          <a
+            href="https://github.com/Shubhjn4357/imersivescroll"
+            className="ghost-button"
+            style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
           >
-            {theme === 'dark' ? (
-              <SunMedium
-                aria-hidden="true"
-                className="icon-button__icon"
-                strokeWidth={1.85}
-              />
-            ) : (
-              <MoonStar
-                aria-hidden="true"
-                className="icon-button__icon"
-                strokeWidth={1.85}
-              />
-            )}
-          </button>
+            v0.1.1
+          </a>
         </div>
       </header>
 
       {children}
 
-      <footer className="site-footer">
-        <span>Shared design source for Next.js, React, Solid, and Web.</span>
-        {footer ?? (
-          <span>
-            Use `pnpm dev:landing` to iterate on the primary site surface.
-          </span>
-        )}
+      <footer
+        className="site-footer"
+        style={{
+          borderTop: '1px solid var(--border)',
+          background: 'rgba(255,255,255,0.02)'
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
+        >
+          <div style={{ display: 'flex', gap: '2rem' }}>
+            <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>
+              © 2026 Immersive Scroll
+            </span>
+            <a href="#" style={{ fontSize: '0.8rem', opacity: 0.5 }}>
+              Privacy
+            </a>
+            <a href="#" style={{ fontSize: '0.8rem', opacity: 0.5 }}>
+              Terms
+            </a>
+          </div>
+          {footer ?? (
+            <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>
+              Powered by immersive-scroll engine
+            </span>
+          )}
+        </div>
       </footer>
     </div>
   );

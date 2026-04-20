@@ -15,6 +15,7 @@ const nextConfig = {
     '@immersive-scroll/core',
     '@immersive-scroll/shared',
     '@immersive-scroll/solid',
+    '@immersive-scroll/svg-mask',
     '@immersive-scroll/web'
   ],
   webpack(config) {
@@ -55,6 +56,10 @@ const nextConfig = {
       '@immersive-scroll/solid$': path.resolve(
         currentDirectory,
         '../../packages/solid/src/index.ts'
+      ),
+      '@immersive-scroll/svg-mask$': path.resolve(
+        currentDirectory,
+        '../../packages/svg-mask/src/index.ts'
       ),
       '@immersive-scroll/web$': path.resolve(
         currentDirectory,

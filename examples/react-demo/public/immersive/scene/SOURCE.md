@@ -1,4 +1,4 @@
 # Demo Asset Source
 
-- Clip: wildrobot
-- Local clip: /examples/assets/wildrobot.mp4
+- Clip: 26080 357512264 medium
+- Local clip: /c:/Users/shubh/Downloads/26080-357512264_medium.mp4

@@ -5,6 +5,11 @@ export { ImmersiveLayer } from './components/ImmersiveLayer';
 export { ImmersiveScroll } from './components/ImmersiveScroll';
 export { ImmersiveScrollbar } from './components/ImmersiveScrollbar';
 export { ImmersiveTriggerZone } from './components/ImmersiveTriggerZone';
+export {
+  ImmersiveScrollytelling,
+  type ImmersiveScrollytellingProps,
+  type ScrollytellingStep
+} from './components/ImmersiveScrollytelling';
 export { ImmersiveScrollProvider } from './context/ImmersiveScrollProvider';
 export { createGsapTimeline } from './gsap/createGsapTimeline';
 export { registerGsapPlugins } from './gsap/registerGsapPlugins';
@@ -17,6 +22,7 @@ export {
 } from './hooks/useImmersiveConfigControls';
 export { useImmersiveContext } from './hooks/useImmersiveContext';
 export { useImmersiveFrame } from './hooks/useImmersiveFrame';
+export { useImmersiveMotionValue } from './hooks/useImmersiveMotionValue';
 export { useImmersivePlugins } from './hooks/useImmersivePlugins';
 export { useImmersiveProgress } from './hooks/useImmersiveProgress';
 export { useImmersiveScroll } from './hooks/useImmersiveScroll';

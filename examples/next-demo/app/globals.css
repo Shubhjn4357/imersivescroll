@@ -1,1 +1,19 @@
-@import '../../shared/landing.css';
+@import 'tailwindcss';
+
+@theme {
+  --background: #050505;
+  --foreground: #ffffff;
+  --accent: #0a84ff;
+  --muted: rgba(255, 255, 255, 0.5);
+  --muted-foreground: rgba(255, 255, 255, 0.4);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --card: rgba(255, 255, 255, 0.03);
+  --card-subtle: rgba(255, 255, 255, 0.05);
+  --surface: rgba(255, 255, 255, 0.02);
+  --surface-strong: rgba(255, 255, 255, 0.06);
+
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 8px;
+}

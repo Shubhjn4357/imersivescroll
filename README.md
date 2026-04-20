@@ -5,6 +5,7 @@ A pnpm monorepo for immersive scroll storytelling, frame-sequence tooling, and c
 ## What ships
 
 - `immersive-scroll`: public package with React exports at the root plus `next`, `solid`, and `web` subpath entry points.
+- `@immersive-scroll/svg-mask`: standalone package for high-performance scroll-driven SVG reveal effects.
 - `immersive-scroll` CLI: bundled frame extraction, validation, repair, manifest, hash, and diagnostics tooling.
 - `examples/next-demo`: the primary docs, demo, and playground surface with the shared mobile-first shell.
 - Internal workspace packages under `packages/` that keep the engine, adapters, shared types, and CLI implementation organized for future expansion.
@@ -31,30 +32,58 @@ Long clips are automatically capped to roughly `250` frames, scaled to landing-p
 
 ```tsx
 import {
-  ImmersiveLayer,
-  ImmersiveScroll,
-  useImmersiveConfigControls
+  ImmersiveScrollytelling,
+  type ScrollytellingStep
 } from 'immersive-scroll';
 
-export function HeroStory() {
-  const controls = useImmersiveConfigControls({
-    initialConfig: {
-      visual: { objectFit: 'cover' },
-      scrollbar: { enabled: true, visibilityMode: 'manual' }
-    }
-  });
+const narrativeSteps: ScrollytellingStep[] = [
+  {
+    id: 'hero',
+    start: 0.0,
+    end: 0.15,
+    placement: 'center',
+    content: <h1>The Pinnacle of Engineering.</h1>
+  },
+  {
+    id: 'disassembly',
+    start: 0.15,
+    end: 0.4,
+    placement: 'left',
+    content: <p>Perfect harmony in every layer.</p>
+  }
+];
 
+export function HeroStory() {
   return (
-    <ImmersiveScroll
+    <ImmersiveScrollytelling
       framesPath="/immersive/story"
-      config={controls.config}
-      overlay={<ImmersiveLayer>Scene chrome</ImmersiveLayer>}
-    >
-      <section>Foreground story content</section>
-    </ImmersiveScroll>
+      steps={narrativeSteps}
+    />
   );
 }
 ```
+
+The `ImmersiveScrollytelling` component wraps our core canvas engine with `framer-motion`, giving you an out-of-the-box "Apple-style" presentation. It natively supports opacity mapping and dynamic text positioning synced perfectly to your user's scroll wheel!
+
+### SVG Mask Reveal
+
+For cinematic reveals of foreground layers over background layers (inspired by Lightship RV), use the standalone `@immersive-scroll/svg-mask` package:
+
+```tsx
+import { ImmersiveSvgMask } from '@immersive-scroll/svg-mask';
+
+export function RevealSection() {
+  return (
+    <ImmersiveSvgMask
+      scrollDistance={2000}
+      background={<div className="bg-static">Static Layer</div>}
+      foreground={<div className="fg-premium">Premium Revealed Content</div>}
+    />
+  );
+}
+```
+
+The `ImmersiveScrollytelling` component wraps our core canvas engine with `framer-motion`, giving you an out-of-the-box "Apple-style" presentation. It natively supports opacity mapping and dynamic text positioning synced perfectly to your user's scroll wheel! Make sure to install `framer-motion` if you want to use this feature.
 
 Pinned scenes default to a fixed full-screen viewport with an inset media layer. Use `viewportProps` or `mediaProps` only when you need a contained layout, custom offsets, or a different stacking order.
 

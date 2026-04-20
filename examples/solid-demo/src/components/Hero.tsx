@@ -1,14 +1,9 @@
-import { ImmersiveFloating, ImmersiveScroll } from 'immersive-scroll/solid';
+import { ImmersiveScroll } from 'immersive-scroll/solid';
 import {
   defaultSceneFramesPath,
-  landingDocsCards,
-  landingFeatureCards,
-  landingFrameworkCards,
   landingHero,
   landingImmersiveConfig,
-  landingMetrics,
-  landingSections,
-  landingSource
+  landingSections
 } from '../../../shared/landing-content';
 
 const solidLandingConfig = {
@@ -22,31 +17,20 @@ const solidLandingConfig = {
 export function Hero() {
   return (
     <ImmersiveScroll
-      class="immersive-stage"
+      class="demo-scene"
       framesPath={defaultSceneFramesPath}
       config={solidLandingConfig}
+      style={{ 'min-height': '400vh' }}
     >
-      <div class="story-stack">
-        <section class="story-panel story-panel--left" id="hero">
-          <article class="story-card">
-            <p class="eyebrow">{landingHero.eyebrow}</p>
-            <h2>{landingHero.title}</h2>
-            <p>{landingHero.description}</p>
-            <div class="landing-metrics">
-              {landingMetrics.map((metric) => (
-                <span>
-                  {metric.label}: {metric.value}
-                </span>
-              ))}
-            </div>
-            <ImmersiveFloating>
-              <div class="story-meta">
-                <span>{landingSource.title}</span>
-                <span>{landingSource.label}</span>
-                <span>{landingSource.license}</span>
-              </div>
-            </ImmersiveFloating>
-          </article>
+      <div class="demo-scene__content">
+        <section class="story-panel story-panel--center" id="hero">
+          <div style={{ 'max-width': '800px' }}>
+            <span class="text-accent">Solid + Canvas</span>
+            <h1 class="text-hero">{landingHero.title}</h1>
+            <p class="text-subtitle" style={{ margin: '0 auto' }}>
+              {landingHero.description}
+            </p>
+          </div>
         </section>
 
         {landingSections.map((section) => (
@@ -54,62 +38,30 @@ export function Hero() {
             class={`story-panel story-panel--${section.align}`}
             id={section.id}
           >
-            <article class="story-card">
-              <p class="story-index">{section.index}</p>
-              <p class="eyebrow">{section.eyebrow}</p>
-              <h3>{section.title}</h3>
-              <p>{section.description}</p>
-              <div class="story-meta">
-                {section.detailChips.map((detailChip) => (
-                  <span>{detailChip}</span>
-                ))}
-              </div>
+            <article
+              class="story-card"
+              style={{
+                'max-width': '450px',
+                background: 'rgba(5,5,5,0.4)',
+                'backdrop-filter': 'blur(12px)'
+              }}
+            >
+              <span class="text-accent">{section.eyebrow}</span>
+              <h2 class="text-title" style={{ 'font-size': '2.5rem' }}>
+                {section.title}
+              </h2>
+              <p class="text-subtitle">{section.description}</p>
             </article>
           </section>
         ))}
 
-        <section
-          class="landing-grid-section landing-grid-section--left"
-          id="features"
-        >
-          <div class="landing-grid-layout landing-grid-layout--features">
-            {landingFeatureCards.map((featureCard) => (
-              <article class="landing-grid-card">
-                <p class="eyebrow">Feature</p>
-                <h3>{featureCard.title}</h3>
-                <p>{featureCard.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section
-          class="landing-grid-section landing-grid-section--right"
-          id="frameworks"
-        >
-          <div class="landing-grid-layout landing-grid-layout--frameworks">
-            {landingFrameworkCards.map((frameworkCard) => (
-              <article class="landing-grid-card">
-                <p class="eyebrow">Adapter</p>
-                <h3>{frameworkCard.title}</h3>
-                <p>{frameworkCard.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section
-          class="landing-grid-section landing-grid-section--left"
-          id="docs"
-        >
-          <div class="landing-grid-layout landing-grid-layout--docs">
-            {landingDocsCards.map((docsCard) => (
-              <article class="landing-grid-card">
-                <p class="eyebrow">Docs</p>
-                <h3>{docsCard.title}</h3>
-                <p>{docsCard.description}</p>
-              </article>
-            ))}
+        <section class="story-panel story-panel--center" id="features">
+          <div style={{ 'text-align': 'center' }}>
+            <h2 class="text-title">Solid Signal Performance</h2>
+            <p class="text-subtitle" style={{ margin: '0 auto' }}>
+              Experience lightning fast frame updates powered by Solid's
+              fine-grained reactivity.
+            </p>
           </div>
         </section>
       </div>

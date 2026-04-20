@@ -43,6 +43,11 @@ export async function extractFrames(
       : config.format === 'png'
         ? ['-an']
         : ['-an', '-q:v', resolveJpegQuality(config.quality)];
+
+  const frameLimitArgs = config.maxFrames
+    ? ['-vframes', String(config.maxFrames)]
+    : [];
+
   const args = [
     '-y',
     '-i',
@@ -50,6 +55,7 @@ export async function extractFrames(
     '-vf',
     filter,
     ...codecArgs,
+    ...frameLimitArgs,
     outputPattern
   ];
 

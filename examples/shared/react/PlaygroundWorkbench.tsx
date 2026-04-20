@@ -10,8 +10,7 @@ import type {
 import { useImmersiveConfigControls } from 'immersive-scroll';
 import {
   defaultSceneFramesPath,
-  defaultSceneManifestPath,
-  landingSource
+  defaultSceneManifestPath
 } from '../landing-content';
 import { CodeBlock } from './CodeBlock';
 
@@ -308,6 +307,7 @@ function ToggleField({
         }`}
         type="button"
         onClick={() => onChange(!checked)}
+        aria-label={checked ? 'Turn off' : 'Turn on'}
       >
         {checked ? 'On' : 'Off'}
       </button>
@@ -690,38 +690,66 @@ export function PlaygroundWorkbench() {
   return (
     <section className="playground-workbench" data-trigger="section">
       <div className="playground-preview-shell glass-card" data-reveal="card">
-        <div className="playground-preview-shell__header">
-          <div>
-            <p className="eyebrow">Contained preview</p>
-            <h3>
-              Scroll inside this panel to test the scene without moving the
-              whole route.
-            </h3>
-            <p>
-              The workbench is driven by
-              <code> useImmersiveConfigControls() </code>
-              and the shared <code>/immersive/scene</code> asset set, so the
-              preview and the package docs stay aligned.
-            </p>
-            <div className="docs-inline-list">
-              <span className="docs-chip">Hook-driven controls</span>
-              <span className="docs-chip">Shared /immersive/scene</span>
-              <span className="docs-chip">Default fixed viewport</span>
-              <span className="docs-chip">
-                {scrollControls.smooth ? 'Smooth scrub on' : 'Smooth scrub off'}
+        <div
+          className="playground-preview-shell__header"
+          style={{ padding: '1.25rem 2.5rem', alignItems: 'center' }}
+        >
+          <div className="header-content" style={{ flex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '1rem',
+                marginBottom: '0.5rem'
+              }}
+            >
+              <p className="eyebrow" style={{ marginBottom: 0 }}>
+                Contained preview
+              </p>
+              <h3
+                className="section-title"
+                style={{ fontSize: '1.1rem', margin: 0 }}
+              >
+                Scrubbing sequence workbench
+              </h3>
+            </div>
+            <div className="docs-inline-list" style={{ gap: '0.5rem' }}>
+              <span
+                className="docs-chip docs-chip--accent"
+                style={{ fontSize: '0.65rem' }}
+              >
+                Hook-driven
+              </span>
+              <span
+                className="docs-chip docs-chip--accent"
+                style={{ fontSize: '0.65rem' }}
+              >
+                Shared Assets
+              </span>
+              <span
+                className="docs-chip docs-chip--accent"
+                style={{ fontSize: '0.65rem' }}
+              >
+                {scrollControls.smooth ? 'Smooth On' : 'Smooth Off'}
               </span>
             </div>
           </div>
-          <div className="info-pill-row">
-            <span className="info-pill">
-              Progress {formatPercent(progress)}
+          <div className="info-pill-row" style={{ gap: '0.75rem' }}>
+            <span className="info-pill" style={{ opacity: 0.9 }}>
+              {formatPercent(progress)}
             </span>
-            <span className="info-pill">
-              Frame {manifest ? currentFrame + 1 : 0}/
-              {manifest?.frameCount ?? 0}
+            <span className="info-pill" style={{ opacity: 0.9 }}>
+              F: {currentFrame + 1}/{manifest?.frameCount ?? 0}
             </span>
-            <span className="info-pill">
-              Loaded {loadedFrameCount}/{manifest?.frameCount ?? 0}
+            <span
+              className="info-pill"
+              style={{
+                background: 'var(--accent)',
+                color: '#fff',
+                border: 'none'
+              }}
+            >
+              {loadedFrameCount}/{manifest?.frameCount ?? 0}
             </span>
           </div>
         </div>
@@ -757,34 +785,62 @@ export function PlaygroundWorkbench() {
                 </div>
               ) : null}
 
-              <div className="playground-preview-hud">
-                {debugEnabled ? (
-                  <div className="playground-preview-debug">
-                    <strong>Debug HUD</strong>
-                    <span>progress {progress.toFixed(3)}</span>
-                    <span>velocity {scrollVelocity.toFixed(3)}</span>
-                    <span>
-                      frame {manifest ? currentFrame + 1 : 0}/
-                      {manifest?.frameCount ?? 0}
-                    </span>
-                    <span>
-                      loaded {loadedFrameCount}/{manifest?.frameCount ?? 0}
-                    </span>
-                  </div>
-                ) : null}
-                <div className="landing-status landing-status--playground">
-                  <strong>Workbench</strong>
-                  <span>Frame scrub inside a bounded preview</span>
-                  <span>
-                    {manifest
-                      ? `${manifest.width}x${manifest.height} ${manifest.format.toUpperCase()}`
-                      : 'Loading manifest'}
-                  </span>
+              <div className="playground-hud">
+                <div className="playground-instrument">
+                  <header className="playground-instrument__header">
+                    <strong className="playground-instrument__title">
+                      Telemetry
+                    </strong>
+                    {debugEnabled && (
+                      <span className="status-dot status-dot--active" />
+                    )}
+                  </header>
+                  <main className="playground-instrument__metrics">
+                    <div className="playground-instrument__metric">
+                      <span>Progress</span>
+                      <span>{progress.toFixed(3)}</span>
+                    </div>
+                    <div className="playground-instrument__metric">
+                      <span>Velocity</span>
+                      <span>{scrollVelocity.toFixed(3)}</span>
+                    </div>
+                    <div className="playground-instrument__metric">
+                      <span>Frame</span>
+                      <span>
+                        {manifest ? currentFrame + 1 : 0}/
+                        {manifest?.frameCount ?? 0}
+                      </span>
+                    </div>
+                  </main>
                 </div>
-                <div className="landing-source landing-source--playground">
-                  <strong>{landingSource.title}</strong>
-                  <span>{landingSource.label}</span>
-                  <span>{landingSource.license}</span>
+
+                <div
+                  className="playground-instrument"
+                  style={{ minWidth: '180px' }}
+                >
+                  <header className="playground-instrument__header">
+                    <strong className="playground-instrument__title">
+                      Workbench
+                    </strong>
+                  </header>
+                  <main className="playground-instrument__metrics">
+                    <div className="playground-instrument__metric">
+                      <span>Type</span>
+                      <span>Sequence</span>
+                    </div>
+                    <div className="playground-instrument__metric">
+                      <span>Res</span>
+                      <span>
+                        {manifest
+                          ? `${manifest.width}x${manifest.height}`
+                          : '...'}
+                      </span>
+                    </div>
+                    <div className="playground-instrument__metric">
+                      <span>Format</span>
+                      <span>{manifest?.format.toUpperCase() ?? '...'}</span>
+                    </div>
+                  </main>
                 </div>
               </div>
             </div>
@@ -798,17 +854,33 @@ export function PlaygroundWorkbench() {
                   style={{ minHeight: sectionMinHeight }}
                 >
                   <article
-                    className="story-card story-card--compact"
+                    className="story-card story-card--compact glass-card"
                     data-align={panel.align}
                     data-reveal="card"
+                    style={{ background: 'rgba(5,5,5,0.4)', maxWidth: '380px' }}
                   >
-                    <p className="eyebrow">{panel.eyebrow}</p>
-                    <h2>{panel.title}</h2>
-                    <p>{panel.description}</p>
-                    <div className="info-pill-row">
+                    <span
+                      className="text-accent"
+                      style={{ fontSize: '0.7rem' }}
+                    >
+                      {panel.eyebrow}
+                    </span>
+                    <h2 style={{ fontSize: '1.5rem', margin: '0.5rem 0' }}>
+                      {panel.title}
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: '0.95rem',
+                        color: 'var(--muted)',
+                        marginBottom: '1.5rem'
+                      }}
+                    >
+                      {panel.description}
+                    </p>
+                    <div className="docs-inline-list">
                       {panel.details.map((detail) => (
                         <span
-                          className="info-pill"
+                          className="docs-chip docs-chip--muted"
                           key={`${panel.title}-${detail}`}
                         >
                           {detail}
@@ -816,7 +888,14 @@ export function PlaygroundWorkbench() {
                       ))}
                     </div>
                     {index === 0 && loadError ? (
-                      <p className="reference-row__default">
+                      <p
+                        className="reference-row__default"
+                        style={{
+                          marginTop: '1rem',
+                          color: '#ff4d4d',
+                          fontSize: '0.8rem'
+                        }}
+                      >
                         Manifest error: {loadError}
                       </p>
                     ) : null}
@@ -831,17 +910,19 @@ export function PlaygroundWorkbench() {
       <div className="playground-control-dock glass-card" data-reveal="card">
         <div className="playground-control-dock__header">
           <div>
-            <p className="eyebrow">Live controls</p>
-            <h3>
-              Tweak the scene props and watch the preview react immediately.
+            <p className="eyebrow">Workbench parameters</p>
+            <h3 className="section-title">
+              Tweak the engine props and watch the preview react.
             </h3>
-            <p>
-              These fields patch the same typed config surface you would use in
-              a product route or a custom debug toolbar.
-            </p>
           </div>
           <button
-            className="action-pill"
+            className="ghost-button"
+            style={{
+              padding: '0.6rem 1.25rem',
+              fontSize: '0.85rem',
+              borderColor: 'var(--border-strong)',
+              background: 'rgba(255,255,255,0.03)'
+            }}
             type="button"
             onClick={() => {
               sceneControls.resetConfig();
@@ -855,7 +936,7 @@ export function PlaygroundWorkbench() {
               scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' });
             }}
           >
-            Reset controls
+            Reset to defaults
           </button>
         </div>
 

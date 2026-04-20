@@ -1,4 +1,4 @@
-import type { ParentProps } from 'solid-js';
+import type { JSX, ParentProps } from 'solid-js';
 import { createSignal } from 'solid-js';
 import type {
   ImmersivePlugin,
@@ -16,6 +16,7 @@ interface ImmersiveScrollProps extends ParentProps {
   video?: string | null;
   plugins?: ImmersivePlugin[];
   class?: string;
+  style?: JSX.CSSProperties | string;
 }
 
 export function ImmersiveScroll(props: ImmersiveScrollProps) {

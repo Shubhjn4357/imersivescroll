@@ -18,7 +18,7 @@ export function Hero({ runtimeLabel = 'Next.js Demo' }: HeroProps) {
       debug: { enabled: false },
       scrollbar: {
         enabled: true,
-        positionMode: 'absolute'
+        positionMode: 'fixed'
       }
     }
   });
@@ -55,12 +55,7 @@ export function Hero({ runtimeLabel = 'Next.js Demo' }: HeroProps) {
             scrollbarPositionMode === 'absolute' ? 'fixed' : 'absolute'
         })
       }
-      footer={
-        <span>
-          Run `pnpm dev:landing` to work on the shared landing source in the
-          Next surface.
-        </span>
-      }
+      footer={<span>shared landing source in the Next surface.</span>}
     />
   );
 }

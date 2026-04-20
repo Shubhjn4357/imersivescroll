@@ -123,7 +123,7 @@ export function ImmersiveScrollbar({
           ? isHovered
           : false);
   const thumbSize = Math.max(scrollbar.minThumbSize, scrollbar.width * 4);
-  const thumbTranslate = `calc((100% - ${thumbSize}px) * ${scrollbar.progress.toFixed(4)})`;
+
   const transition = `opacity ${scrollbar.transitionDuration}ms ease, transform ${scrollbar.transitionDuration}ms ease`;
   const isInteractive = interactive ?? scrollbar.interactive;
   const placementInput = resolvePlacementInput({
@@ -259,13 +259,14 @@ export function ImmersiveScrollbar({
     ...trackStyle
   };
 
+  const thumbTopPosition = `calc((100% - ${thumbSize}px) * ${Math.max(0, Math.min(1, scrollbar.progress)).toFixed(4)})`;
+
   const thumbComputedStyle: CSSProperties = {
     ...sharedRailStyle,
-    top: 0,
+    top: thumbTopPosition,
     height: thumbSize,
     background: scrollbar.thumbColor,
     opacity: isVisible ? scrollbar.thumbOpacity : 0,
-    transform: `translate3d(0, ${thumbTranslate}, 0)`,
     ...thumbStyle
   };
 

@@ -88,8 +88,7 @@ export function ImmersiveScroll({
         style={{
           position: 'relative',
           minHeight: '100vh',
-          overflow: 'hidden',
-          isolation: 'isolate',
+          overflow: 'visible',
           background: '#000000',
           color: '#ffffff',
           ...style
@@ -101,9 +100,8 @@ export function ImmersiveScroll({
           className={viewportProps?.className}
           style={{
             ...viewportPlacementStyle,
-            minHeight: '100vh',
+            height: '100vh',
             overflow: 'hidden',
-            isolation: 'isolate',
             ...viewportProps?.style
           }}
         >
