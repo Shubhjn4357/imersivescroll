@@ -1,6 +1,6 @@
 {
   "name": "@immersive-scroll/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Framework-agnostic immersive scroll engine.",
   "license": "MIT",
   "repository": {
