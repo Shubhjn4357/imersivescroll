@@ -1,5 +1,16 @@
 # @immersive-scroll/web
 
+## 0.1.2
+
+### Patch Changes
+
+- 5e9377b: change the design of whole arch
+- ab2074b: the pinned viewport resolves to position: fixed with inset: 0, the media stays full-bleed, and the story content is kept on an explicit higher layer. I aligned the package defaults in Solid and web too in ImmersiveScroll.tsx and createContainerStructure.ts. The override props still work, so if a route needs the scene above extra chrome you can raise it with viewportProps.zIndex.
+- Updated dependencies [5e9377b]
+- Updated dependencies [ab2074b]
+  - @immersive-scroll/core@0.1.2
+  - @immersive-scroll/shared@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

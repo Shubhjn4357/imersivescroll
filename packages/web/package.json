@@ -1,6 +1,6 @@
 {
   "name": "@immersive-scroll/web",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Vanilla web adapter for immersive scroll video.",
   "license": "MIT",
   "repository": {
