@@ -38,6 +38,33 @@ export default defineConfig({
             import.meta.url
           )
         )
+      },
+      {
+        find: /^@immersive-scroll\/core$/,
+        replacement: fileURLToPath(
+          new URL('../../packages/core/src/index.ts', import.meta.url)
+        )
+      },
+      {
+        find: /^@immersive-scroll\/shared$/,
+        replacement: fileURLToPath(
+          new URL('../../packages/shared/src/index.ts', import.meta.url)
+        )
+      },
+      {
+        find: /^@immersive-scroll\/svg-mask$/,
+        replacement: fileURLToPath(
+          new URL('../../packages/svg-mask/src/index.ts', import.meta.url)
+        )
+      },
+      {
+        find: /^@immersive-scroll\/horizontal-scroll$/,
+        replacement: fileURLToPath(
+          new URL(
+            '../../packages/horizontal-scroll/src/index.ts',
+            import.meta.url
+          )
+        )
       }
     ]
   }

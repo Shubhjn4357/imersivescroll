@@ -62,6 +62,15 @@ export default defineConfig({
         replacement: fileURLToPath(
           new URL('../../packages/svg-mask/src/index.ts', import.meta.url)
         )
+      },
+      {
+        find: /^@immersive-scroll\/horizontal-scroll$/,
+        replacement: fileURLToPath(
+          new URL(
+            '../../packages/horizontal-scroll/src/index.ts',
+            import.meta.url
+          )
+        )
       }
     ]
   }

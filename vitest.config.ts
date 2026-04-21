@@ -59,6 +59,17 @@ const integrationAliasEntries = [
       rootDirectory,
       'packages/immersive-scroll/src/index.ts'
     )
+  },
+  {
+    find: /^@immersive-scroll\/svg-mask$/,
+    replacement: path.resolve(rootDirectory, 'packages/svg-mask/src/index.ts')
+  },
+  {
+    find: /^@immersive-scroll\/horizontal-scroll$/,
+    replacement: path.resolve(
+      rootDirectory,
+      'packages/horizontal-scroll/src/index.ts'
+    )
   }
 ];
 
