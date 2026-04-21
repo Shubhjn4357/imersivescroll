@@ -1,5 +1,13 @@
 # @immersive-scroll-example/next-demo
 
+## 0.1.2
+
+### Patch Changes
+
+- 00b445a: A new laboratory for testing high-performance horizontal translation using the dedicated package.
+- Updated dependencies [00b445a]
+  - immersive-scroll@0.1.3
+
 ## 0.1.1
 
 ### Patch Changes
