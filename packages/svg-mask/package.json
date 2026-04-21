@@ -1,6 +1,6 @@
 {
   "name": "@immersive-scroll/svg-mask",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Scroll-driven SVG mask effect for immersive reveals.",
   "license": "MIT",
   "type": "module",
