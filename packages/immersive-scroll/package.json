@@ -1,6 +1,6 @@
 {
   "name": "immersive-scroll",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Single-install immersive scroll package with React root exports and Next, Solid, and Web subpath adapters.",
   "license": "MIT",
   "repository": {
