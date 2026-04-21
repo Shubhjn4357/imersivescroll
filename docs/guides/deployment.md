@@ -15,4 +15,14 @@ Deployment rules are simple:
 
 Required repository secret:
 
-- `NPM_TOKEN`: npm token with access to publish `immersive-scroll`.
+- `NPM_TOKEN`: npm token with access to publish `immersive-scroll`. Use a "Granular" or "Automation" token from npmjs.com.
+
+### Custom GitHub Token (Optional)
+
+By default, the workflow uses your repository's built-in `GITHUB_TOKEN`. However, if you want the automated release PRs to trigger CI checks, you should provide a custom token:
+
+- `RELEASE_GITHUB_TOKEN`: A Personal Access Token (PAT) with `repo` scopes.
+
+> [!IMPORTANT]
+> If you do **not** provide a `RELEASE_GITHUB_TOKEN`, you **must** enable the following setting in your repository:
+> **Settings > Actions > General > Workflow permissions > Allow GitHub Actions to create and approve pull requests**.

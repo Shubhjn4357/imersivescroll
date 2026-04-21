@@ -1,6 +1,8 @@
-import { ImmersiveScrollytelling } from '@immersive-scroll/react';
-import type { ScrollytellingStep } from '@immersive-scroll/react';
-import { useImmersiveConfigControls } from 'immersive-scroll';
+import {
+  ImmersiveScrollytelling,
+  useImmersiveConfigControls,
+  type ScrollytellingStep
+} from 'immersive-scroll';
 
 const narrativeSteps: ScrollytellingStep[] = [
   {
