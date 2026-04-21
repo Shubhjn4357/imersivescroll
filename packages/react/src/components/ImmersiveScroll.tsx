@@ -52,7 +52,8 @@ export function ImmersiveScroll({
   overlay,
   scrollbarProps,
   viewportProps,
-  mediaProps
+  mediaProps,
+  scrollSource = 'window'
 }: ImmersiveScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -80,6 +81,7 @@ export function ImmersiveScroll({
       containerRef={containerRef}
       viewportRef={viewportRef}
       canvasRef={canvasRef}
+      scrollSource={scrollSource}
     >
       <div
         ref={containerRef}

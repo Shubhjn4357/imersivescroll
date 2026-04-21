@@ -10,6 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@immersive-scroll/horizontal-scroll": "workspace:^",
     "@immersive-scroll/svg-mask": "workspace:^",
     "immersive-scroll": "workspace:^",
     "lucide-react": "^1.7.0",

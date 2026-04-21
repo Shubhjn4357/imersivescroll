@@ -1,12 +1,14 @@
 'use client';
 
-import type { ChangeEvent, CSSProperties, UIEvent } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type {
-  ImmersiveFrameManifest,
-  ObjectFitMode,
-  PartialImmersiveConfig
+import type { ChangeEvent } from 'react';
+import { useMemo, useState } from 'react';
+import {
+  ImmersiveScroll,
+  useImmersiveProgress,
+  useImmersiveFrame,
+  useImmersiveVelocity
 } from 'immersive-scroll';
+import type { ObjectFitMode, PartialImmersiveConfig } from 'immersive-scroll';
 import { useImmersiveConfigControls } from 'immersive-scroll';
 import {
   defaultSceneFramesPath,
@@ -34,11 +36,6 @@ interface WorkbenchScrollState {
   smooth: boolean;
   lerp: number;
   duration: number;
-}
-
-interface ViewportSize {
-  width: number;
-  height: number;
 }
 
 interface PreviewPanel {
@@ -136,117 +133,6 @@ const previewPanels: readonly PreviewPanel[] = [
   }
 ] as const;
 
-function clamp(value: number, minimum: number, maximum: number) {
-  return Math.min(Math.max(value, minimum), maximum);
-}
-
-function isImmersiveFrameManifest(
-  value: unknown
-): value is ImmersiveFrameManifest {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const candidate = value as Partial<ImmersiveFrameManifest>;
-  return (
-    typeof candidate.frameCount === 'number' &&
-    candidate.frameCount > 0 &&
-    typeof candidate.framePrefix === 'string' &&
-    typeof candidate.format === 'string'
-  );
-}
-
-function resolveFrameUrl(
-  manifest: ImmersiveFrameManifest,
-  frameIndex: number
-): string {
-  const basePath = (manifest.framesPath ?? '').replace(/\/$/, '');
-  const frameNumber = String(frameIndex + 1).padStart(5, '0');
-  return `${basePath}/${manifest.framePrefix}-${frameNumber}.${manifest.format}`;
-}
-
-function buildCanvasFilter(controls: WorkbenchVisualState) {
-  return `brightness(${controls.brightness}) contrast(${controls.contrast}) saturate(${controls.saturate}) blur(${controls.blur}px)`;
-}
-
-function resolvePreviewSmoothingAmount(
-  deltaTimeMs: number,
-  lerpAmount: number,
-  durationSeconds: number
-) {
-  const normalizedLerp = clamp(lerpAmount, 0.01, 1);
-  const normalizedDuration = Math.max(durationSeconds, 0.001);
-  const frameRateAdjustedAmount =
-    1 - Math.pow(1 - normalizedLerp, deltaTimeMs / 16);
-  const durationAdjustedAmount = clamp(
-    deltaTimeMs / (normalizedDuration * 1000),
-    0.01,
-    1
-  );
-
-  return clamp(
-    Math.max(frameRateAdjustedAmount, durationAdjustedAmount),
-    0.01,
-    1
-  );
-}
-
-function drawFrameToCanvas(
-  canvas: HTMLCanvasElement,
-  image: HTMLImageElement,
-  viewportSize: ViewportSize,
-  controls: WorkbenchVisualState
-) {
-  const context = canvas.getContext('2d');
-  if (!context || viewportSize.width <= 0 || viewportSize.height <= 0) {
-    return;
-  }
-
-  const devicePixelRatio = window.devicePixelRatio || 1;
-  const renderWidth = Math.max(1, Math.round(viewportSize.width));
-  const renderHeight = Math.max(1, Math.round(viewportSize.height));
-  const nextCanvasWidth = Math.max(
-    1,
-    Math.round(renderWidth * devicePixelRatio)
-  );
-  const nextCanvasHeight = Math.max(
-    1,
-    Math.round(renderHeight * devicePixelRatio)
-  );
-
-  if (canvas.width !== nextCanvasWidth || canvas.height !== nextCanvasHeight) {
-    canvas.width = nextCanvasWidth;
-    canvas.height = nextCanvasHeight;
-  }
-
-  context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-  context.clearRect(0, 0, renderWidth, renderHeight);
-  context.fillStyle = '#03060c';
-  context.fillRect(0, 0, renderWidth, renderHeight);
-  context.save();
-  context.filter = buildCanvasFilter(controls);
-
-  if (controls.objectFit === 'fill') {
-    context.drawImage(image, 0, 0, renderWidth, renderHeight);
-    context.restore();
-    return;
-  }
-
-  const widthScale = renderWidth / image.naturalWidth;
-  const heightScale = renderHeight / image.naturalHeight;
-  const scale =
-    controls.objectFit === 'contain'
-      ? Math.min(widthScale, heightScale)
-      : Math.max(widthScale, heightScale);
-  const drawWidth = image.naturalWidth * scale;
-  const drawHeight = image.naturalHeight * scale;
-  const offsetX = (renderWidth - drawWidth) / 2;
-  const offsetY = (renderHeight - drawHeight) / 2;
-
-  context.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-  context.restore();
-}
-
 function formatPercent(value: number) {
   return `${Math.round(value * 100)}%`;
 }
@@ -316,137 +202,10 @@ function ToggleField({
 }
 
 export function PlaygroundWorkbench() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
-  const progressRef = useRef(0);
-  const lastScrollTopRef = useRef(0);
-  const lastScrollTimestampRef = useRef(0);
-  const velocityTimeoutRef = useRef(0);
   const sceneControls = useImmersiveConfigControls({
     initialConfig: defaultWorkbenchConfig
   });
-  const [manifest, setManifest] = useState<ImmersiveFrameManifest | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [targetProgress, setTargetProgress] = useState(0);
-  const [scrollVelocity, setScrollVelocity] = useState(0);
-  const [loadedFrameCount, setLoadedFrameCount] = useState(0);
-  const [viewportSize, setViewportSize] = useState<ViewportSize>({
-    width: 0,
-    height: 0
-  });
   const [scrollScreens, setScrollScreens] = useState(defaultScrollScreens);
-
-  useEffect(() => {
-    progressRef.current = progress;
-  }, [progress]);
-
-  useEffect(
-    () => () => {
-      window.clearTimeout(velocityTimeoutRef.current);
-    },
-    []
-  );
-
-  useEffect(() => {
-    let active = true;
-
-    void fetch(defaultSceneManifestPath)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Manifest request failed with ${response.status}`);
-        }
-
-        return response.json() as Promise<unknown>;
-      })
-      .then((data) => {
-        if (!active) {
-          return;
-        }
-
-        if (!isImmersiveFrameManifest(data)) {
-          throw new Error('Manifest shape is invalid.');
-        }
-
-        setManifest(data);
-      })
-      .catch((error: unknown) => {
-        if (!active) {
-          return;
-        }
-
-        const message =
-          error instanceof Error ? error.message : 'Unable to load manifest.';
-        setLoadError(message);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const viewportElement = viewportRef.current;
-    if (!viewportElement) {
-      return;
-    }
-
-    const updateViewportSize = () => {
-      setViewportSize({
-        width: viewportElement.clientWidth,
-        height: viewportElement.clientHeight
-      });
-    };
-
-    updateViewportSize();
-
-    const observer = new ResizeObserver(() => {
-      updateViewportSize();
-    });
-
-    observer.observe(viewportElement);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!manifest) {
-      return;
-    }
-
-    let disposed = false;
-    const nextCache = new Map<number, HTMLImageElement>();
-
-    setLoadedFrameCount(0);
-
-    for (
-      let frameIndex = 0;
-      frameIndex < manifest.frameCount;
-      frameIndex += 1
-    ) {
-      const image = new Image();
-      image.decoding = 'async';
-      image.src = resolveFrameUrl(manifest, frameIndex);
-      image.onload = () => {
-        if (disposed) {
-          return;
-        }
-
-        nextCache.set(frameIndex, image);
-        imageCacheRef.current = nextCache;
-        setLoadedFrameCount(nextCache.size);
-      };
-    }
-
-    return () => {
-      disposed = true;
-      imageCacheRef.current = new Map<number, HTMLImageElement>();
-    };
-  }, [manifest]);
 
   const visualControls = useMemo<WorkbenchVisualState>(
     () => ({
@@ -502,6 +261,7 @@ export function PlaygroundWorkbench() {
     }),
     [sceneControls.config.scroll]
   );
+
   const debugEnabled = sceneControls.config.debug?.enabled ?? false;
 
   const workbenchConfig = useMemo<PartialImmersiveConfig>(
@@ -531,119 +291,6 @@ export function PlaygroundWorkbench() {
     [debugEnabled, scrollControls, scrollbarControls, visualControls]
   );
 
-  useEffect(() => {
-    if (!scrollControls.smooth) {
-      progressRef.current = targetProgress;
-      setProgress(targetProgress);
-      return;
-    }
-
-    let animationFrameId = 0;
-    let lastTimestamp = performance.now();
-
-    const animateProgress = (timestamp: number) => {
-      const deltaTime = Math.max(timestamp - lastTimestamp, 16);
-      const currentProgress = progressRef.current;
-      const progressGap = targetProgress - currentProgress;
-
-      lastTimestamp = timestamp;
-
-      if (Math.abs(progressGap) <= 0.0005) {
-        if (currentProgress !== targetProgress) {
-          progressRef.current = targetProgress;
-          setProgress(targetProgress);
-        }
-        return;
-      }
-
-      const nextProgress = clamp(
-        currentProgress +
-          progressGap *
-            resolvePreviewSmoothingAmount(
-              deltaTime,
-              scrollControls.lerp,
-              scrollControls.duration
-            ),
-        0,
-        1
-      );
-      const resolvedProgress =
-        Math.abs(targetProgress - nextProgress) <= 0.0005
-          ? targetProgress
-          : nextProgress;
-
-      progressRef.current = resolvedProgress;
-      setProgress(resolvedProgress);
-      animationFrameId = window.requestAnimationFrame(animateProgress);
-    };
-
-    animationFrameId = window.requestAnimationFrame(animateProgress);
-
-    return () => {
-      window.cancelAnimationFrame(animationFrameId);
-    };
-  }, [
-    scrollControls.duration,
-    scrollControls.lerp,
-    scrollControls.smooth,
-    targetProgress
-  ]);
-
-  const currentFrame = useMemo(() => {
-    if (!manifest) {
-      return 0;
-    }
-
-    return Math.round(
-      clamp(progress, 0, 1) * Math.max(manifest.frameCount - 1, 0)
-    );
-  }, [manifest, progress]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const image = imageCacheRef.current.get(currentFrame);
-
-    if (!canvas || !image) {
-      return;
-    }
-
-    drawFrameToCanvas(canvas, image, viewportSize, visualControls);
-  }, [currentFrame, loadedFrameCount, viewportSize, visualControls]);
-
-  const stageHeight = useMemo(() => {
-    const nextViewportHeight = Math.max(viewportSize.height, 560);
-    return nextViewportHeight * scrollScreens;
-  }, [scrollScreens, viewportSize.height]);
-
-  const sectionMinHeight = useMemo(() => {
-    if (previewPanels.length === 0) {
-      return Math.max(viewportSize.height, 560);
-    }
-
-    return stageHeight / previewPanels.length;
-  }, [stageHeight, viewportSize.height]);
-
-  const thumbHeight = useMemo(() => {
-    const heightBase = Math.max(viewportSize.height * 0.18, 88);
-    return Math.min(heightBase, Math.max(viewportSize.height * 0.32, 120));
-  }, [viewportSize.height]);
-
-  const thumbStyle: CSSProperties = useMemo(
-    () => ({
-      height: thumbHeight,
-      opacity: scrollbarControls.thumbOpacity,
-      background: scrollbarControls.thumbColor,
-      transform: `translate3d(0, calc((100% - ${thumbHeight}px) * ${progress.toFixed(4)}), 0)`,
-      boxShadow: `0 0 24px ${scrollbarControls.thumbColor}55`
-    }),
-    [
-      progress,
-      scrollbarControls.thumbColor,
-      scrollbarControls.thumbOpacity,
-      thumbHeight
-    ]
-  );
-
   const liveConfig = useMemo(
     () =>
       JSON.stringify(
@@ -660,487 +307,316 @@ export function PlaygroundWorkbench() {
     [scrollScreens, workbenchConfig]
   );
 
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    const element = event.currentTarget;
-    const maxScroll = Math.max(element.scrollHeight - element.clientHeight, 1);
-    const nextTargetProgress = element.scrollTop / maxScroll;
-    const nextTimestamp = performance.now();
-    const deltaScroll = element.scrollTop - lastScrollTopRef.current;
-    const deltaTime = Math.max(
-      nextTimestamp - lastScrollTimestampRef.current,
-      16
-    );
-
-    lastScrollTopRef.current = element.scrollTop;
-    lastScrollTimestampRef.current = nextTimestamp;
-
-    setTargetProgress(nextTargetProgress);
-    setScrollVelocity(deltaScroll / deltaTime);
-    window.clearTimeout(velocityTimeoutRef.current);
-    velocityTimeoutRef.current = window.setTimeout(() => {
-      setScrollVelocity(0);
-    }, 120);
-
-    if (!scrollControls.smooth) {
-      progressRef.current = nextTargetProgress;
-      setProgress(nextTargetProgress);
-    }
-  };
-
   return (
     <section className="playground-workbench" data-trigger="section">
       <div className="playground-preview-shell glass-card" data-reveal="card">
-        <div
-          className="playground-preview-shell__header"
-          style={{ padding: '1.25rem 2.5rem', alignItems: 'center' }}
+        <ImmersiveScroll
+          scrollSource="container"
+          manifestPath={defaultSceneManifestPath}
+          framesPath={defaultSceneFramesPath}
+          config={workbenchConfig}
+          style={{ height: '560px' }}
+          overlay={
+            <>
+              <div className="playground-preview-shell__header-overlay">
+                <WorkbenchHeader />
+              </div>
+              <div className="playground-preview-stage">
+                <div style={{ height: `${scrollScreens * 100}%` }} />
+              </div>
+              <WorkbenchHUD debugEnabled={debugEnabled} />
+            </>
+          }
         >
-          <div className="header-content" style={{ flex: 1 }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '1rem',
-                marginBottom: '0.5rem'
-              }}
-            >
-              <p className="eyebrow" style={{ marginBottom: 0 }}>
-                Contained preview
-              </p>
-              <h3
-                className="section-title"
-                style={{ fontSize: '1.1rem', margin: 0 }}
+          <div className="playground-content-sections">
+            {previewPanels.map((panel, index) => (
+              <div
+                key={index}
+                className="playground-preview-section"
+                style={{ height: '560px' }}
               >
-                Scrubbing sequence workbench
-              </h3>
-            </div>
-            <div className="docs-inline-list" style={{ gap: '0.5rem' }}>
-              <span
-                className="docs-chip docs-chip--accent"
-                style={{ fontSize: '0.65rem' }}
-              >
-                Hook-driven
-              </span>
-              <span
-                className="docs-chip docs-chip--accent"
-                style={{ fontSize: '0.65rem' }}
-              >
-                Shared Assets
-              </span>
-              <span
-                className="docs-chip docs-chip--accent"
-                style={{ fontSize: '0.65rem' }}
-              >
-                {scrollControls.smooth ? 'Smooth On' : 'Smooth Off'}
-              </span>
-            </div>
+                <div
+                  className={`playground-preview-section__content ${
+                    panel.align === 'right'
+                      ? 'playground-preview-section__content--right'
+                      : ''
+                  }`}
+                >
+                  <p className="eyebrow">{panel.eyebrow}</p>
+                  <h3 className="section-title">{panel.title}</h3>
+                  <p className="body-text">{panel.description}</p>
+                  <div className="docs-inline-list">
+                    {panel.details.map((detail) => (
+                      <span
+                        key={detail}
+                        className="docs-chip docs-chip--outline"
+                      >
+                        {detail}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="info-pill-row" style={{ gap: '0.75rem' }}>
-            <span className="info-pill" style={{ opacity: 0.9 }}>
-              {formatPercent(progress)}
-            </span>
-            <span className="info-pill" style={{ opacity: 0.9 }}>
-              F: {currentFrame + 1}/{manifest?.frameCount ?? 0}
-            </span>
-            <span
-              className="info-pill"
-              style={{
-                background: 'var(--accent)',
-                color: '#fff',
-                border: 'none'
-              }}
+        </ImmersiveScroll>
+      </div>
+
+      <div className="playground-controls glass-card" data-reveal="card">
+        <div className="playground-controls__group">
+          <p className="eyebrow">Visual fidelity</p>
+          <RangeField
+            label="Brightness"
+            maximum={2}
+            minimum={0}
+            step={0.01}
+            value={visualControls.brightness}
+            onChange={(val) => sceneControls.updateVisual({ brightness: val })}
+          />
+          <RangeField
+            label="Contrast"
+            maximum={2}
+            minimum={0}
+            step={0.01}
+            value={visualControls.contrast}
+            onChange={(val) => sceneControls.updateVisual({ contrast: val })}
+          />
+          <RangeField
+            label="Saturate"
+            maximum={2}
+            minimum={0}
+            step={0.01}
+            value={visualControls.saturate}
+            onChange={(val) => sceneControls.updateVisual({ saturate: val })}
+          />
+          <RangeField
+            label="Blur"
+            maximum={24}
+            minimum={0}
+            step={1}
+            value={visualControls.blur}
+            onChange={(val) => sceneControls.updateVisual({ blur: val })}
+          />
+          <div className="control-field">
+            <span className="control-field__label">Object fit</span>
+            <select
+              className="control-select"
+              value={visualControls.objectFit}
+              onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                sceneControls.updateVisual({
+                  objectFit: event.currentTarget.value as ObjectFitMode
+                })
+              }
             >
-              {loadedFrameCount}/{manifest?.frameCount ?? 0}
-            </span>
+              <option value="cover">cover</option>
+              <option value="contain">contain</option>
+              <option value="fill">fill</option>
+            </select>
           </div>
         </div>
 
-        <div
-          className="playground-preview-scroll"
-          ref={scrollRef}
-          onScroll={handleScroll}
-        >
-          <div
-            className="playground-preview-stage"
-            style={{ minHeight: stageHeight }}
-          >
-            <div className="playground-preview-viewport" ref={viewportRef}>
-              <canvas className="playground-preview-canvas" ref={canvasRef} />
-              <div
-                className="playground-preview-vignette"
-                style={{ opacity: visualControls.overlayOpacity }}
-              />
-              {scrollbarControls.showScrollbar ? (
-                <div
-                  className="playground-preview-scrollbar"
-                  aria-hidden="true"
-                >
-                  <div
-                    className="playground-preview-scrollbar__track"
-                    style={{ opacity: scrollbarControls.trackOpacity }}
-                  />
-                  <div
-                    className="playground-preview-scrollbar__thumb"
-                    style={thumbStyle}
-                  />
-                </div>
-              ) : null}
+        <div className="playground-controls__group">
+          <p className="eyebrow">Motion feel</p>
+          <ToggleField
+            label="Smooth interpolation"
+            checked={scrollControls.smooth}
+            onChange={(val) => sceneControls.updateScroll({ smooth: val })}
+          />
+          <RangeField
+            label="Lerp factor"
+            maximum={1}
+            minimum={0.01}
+            step={0.01}
+            value={scrollControls.lerp}
+            onChange={(val) => sceneControls.updateScroll({ lerp: val })}
+          />
+          <RangeField
+            label="Duration (s)"
+            maximum={2}
+            minimum={0.1}
+            step={0.05}
+            value={scrollControls.duration}
+            onChange={(val) => sceneControls.updateScroll({ duration: val })}
+          />
+          <RangeField
+            label="Scroll reach"
+            maximum={10}
+            minimum={1}
+            step={0.1}
+            value={scrollScreens}
+            onChange={setScrollScreens}
+            formatter={(v) => `${v.toFixed(1)} screens`}
+          />
+        </div>
 
-              <div className="playground-hud">
-                <div className="playground-instrument">
-                  <header className="playground-instrument__header">
-                    <strong className="playground-instrument__title">
-                      Telemetry
-                    </strong>
-                    {debugEnabled && (
-                      <span className="status-dot status-dot--active" />
-                    )}
-                  </header>
-                  <main className="playground-instrument__metrics">
-                    <div className="playground-instrument__metric">
-                      <span>Progress</span>
-                      <span>{progress.toFixed(3)}</span>
-                    </div>
-                    <div className="playground-instrument__metric">
-                      <span>Velocity</span>
-                      <span>{scrollVelocity.toFixed(3)}</span>
-                    </div>
-                    <div className="playground-instrument__metric">
-                      <span>Frame</span>
-                      <span>
-                        {manifest ? currentFrame + 1 : 0}/
-                        {manifest?.frameCount ?? 0}
-                      </span>
-                    </div>
-                  </main>
-                </div>
-
-                <div
-                  className="playground-instrument"
-                  style={{ minWidth: '180px' }}
-                >
-                  <header className="playground-instrument__header">
-                    <strong className="playground-instrument__title">
-                      Workbench
-                    </strong>
-                  </header>
-                  <main className="playground-instrument__metrics">
-                    <div className="playground-instrument__metric">
-                      <span>Type</span>
-                      <span>Sequence</span>
-                    </div>
-                    <div className="playground-instrument__metric">
-                      <span>Res</span>
-                      <span>
-                        {manifest
-                          ? `${manifest.width}x${manifest.height}`
-                          : '...'}
-                      </span>
-                    </div>
-                    <div className="playground-instrument__metric">
-                      <span>Format</span>
-                      <span>{manifest?.format.toUpperCase() ?? '...'}</span>
-                    </div>
-                  </main>
-                </div>
-              </div>
-            </div>
-
-            <div className="playground-preview-content">
-              {previewPanels.map((panel, index) => (
-                <section
-                  className={`story-panel story-panel--compact story-panel--${panel.align}`}
-                  data-trigger="section"
-                  key={panel.title}
-                  style={{ minHeight: sectionMinHeight }}
-                >
-                  <article
-                    className="story-card story-card--compact glass-card"
-                    data-align={panel.align}
-                    data-reveal="card"
-                    style={{ background: 'rgba(5,5,5,0.4)', maxWidth: '380px' }}
-                  >
-                    <span
-                      className="text-accent"
-                      style={{ fontSize: '0.7rem' }}
-                    >
-                      {panel.eyebrow}
-                    </span>
-                    <h2 style={{ fontSize: '1.5rem', margin: '0.5rem 0' }}>
-                      {panel.title}
-                    </h2>
-                    <p
-                      style={{
-                        fontSize: '0.95rem',
-                        color: 'var(--muted)',
-                        marginBottom: '1.5rem'
-                      }}
-                    >
-                      {panel.description}
-                    </p>
-                    <div className="docs-inline-list">
-                      {panel.details.map((detail) => (
-                        <span
-                          className="docs-chip docs-chip--muted"
-                          key={`${panel.title}-${detail}`}
-                        >
-                          {detail}
-                        </span>
-                      ))}
-                    </div>
-                    {index === 0 && loadError ? (
-                      <p
-                        className="reference-row__default"
-                        style={{
-                          marginTop: '1rem',
-                          color: '#ff4d4d',
-                          fontSize: '0.8rem'
-                        }}
-                      >
-                        Manifest error: {loadError}
-                      </p>
-                    ) : null}
-                  </article>
-                </section>
+        <div className="playground-controls__group">
+          <p className="eyebrow">Interface</p>
+          <ToggleField
+            label="Scrollbar"
+            checked={scrollbarControls.showScrollbar}
+            onChange={(val) => sceneControls.updateScrollbar({ enabled: val })}
+          />
+          <RangeField
+            label="Track opacity"
+            maximum={1}
+            minimum={0}
+            step={0.01}
+            value={scrollbarControls.trackOpacity}
+            onChange={(val) =>
+              sceneControls.updateScrollbar({ trackOpacity: val })
+            }
+          />
+          <RangeField
+            label="Thumb opacity"
+            maximum={1}
+            minimum={0}
+            step={0.01}
+            value={scrollbarControls.thumbOpacity}
+            onChange={(val) =>
+              sceneControls.updateScrollbar({ thumbOpacity: val })
+            }
+          />
+          <div className="control-swatch-group">
+            <span className="control-field__label">Thumb color</span>
+            <div className="control-swatch-row">
+              {thumbColorOptions.map((color) => (
+                <button
+                  key={color}
+                  className={`control-swatch${scrollbarControls.thumbColor === color ? ' control-swatch--active' : ''}`}
+                  style={{ background: color }}
+                  type="button"
+                  onClick={() =>
+                    sceneControls.updateScrollbar({ thumbColor: color })
+                  }
+                />
               ))}
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="playground-control-dock glass-card" data-reveal="card">
-        <div className="playground-control-dock__header">
-          <div>
-            <p className="eyebrow">Workbench parameters</p>
-            <h3 className="section-title">
-              Tweak the engine props and watch the preview react.
-            </h3>
-          </div>
+        <div className="playground-controls__group">
+          <p className="eyebrow">Diagnostics</p>
+          <ToggleField
+            label="Debug instrument"
+            checked={debugEnabled}
+            onChange={(val) => sceneControls.updateDebug({ enabled: val })}
+          />
           <button
-            className="ghost-button"
+            className="docs-chip docs-chip--accent"
             style={{
-              padding: '0.6rem 1.25rem',
-              fontSize: '0.85rem',
-              borderColor: 'var(--border-strong)',
-              background: 'rgba(255,255,255,0.03)'
+              width: '100%',
+              justifyContent: 'center',
+              marginTop: '1rem'
             }}
             type="button"
             onClick={() => {
-              sceneControls.resetConfig();
-              setScrollScreens(defaultScrollScreens);
-              progressRef.current = 0;
-              lastScrollTopRef.current = 0;
-              lastScrollTimestampRef.current = performance.now();
-              setProgress(0);
-              setTargetProgress(0);
-              setScrollVelocity(0);
-              scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+              void navigator.clipboard.writeText(liveConfig);
             }}
           >
-            Reset to defaults
+            Copy schema JSON
           </button>
         </div>
+      </div>
 
-        <div className="playground-control-grid">
-          <div className="playground-control-card">
-            <p className="eyebrow">Visual</p>
-            <RangeField
-              label="Overlay opacity"
-              value={visualControls.overlayOpacity}
-              minimum={0}
-              maximum={0.55}
-              step={0.01}
-              onChange={(nextValue) =>
-                sceneControls.updateVisual({ overlayOpacity: nextValue })
-              }
-              formatter={formatPercent}
-            />
-            <RangeField
-              label="Brightness"
-              value={visualControls.brightness}
-              minimum={0.7}
-              maximum={1.25}
-              step={0.01}
-              onChange={(nextValue) =>
-                sceneControls.updateVisual({ brightness: nextValue })
-              }
-            />
-            <RangeField
-              label="Contrast"
-              value={visualControls.contrast}
-              minimum={0.8}
-              maximum={1.4}
-              step={0.01}
-              onChange={(nextValue) =>
-                sceneControls.updateVisual({ contrast: nextValue })
-              }
-            />
-            <RangeField
-              label="Saturate"
-              value={visualControls.saturate}
-              minimum={0.8}
-              maximum={1.5}
-              step={0.01}
-              onChange={(nextValue) =>
-                sceneControls.updateVisual({ saturate: nextValue })
-              }
-            />
-            <RangeField
-              label="Blur"
-              value={visualControls.blur}
-              minimum={0}
-              maximum={8}
-              step={0.1}
-              onChange={(nextValue) =>
-                sceneControls.updateVisual({ blur: nextValue })
-              }
-            />
-
-            <label className="control-field">
-              <span className="control-field__label">Object fit</span>
-              <select
-                className="control-select"
-                value={visualControls.objectFit}
-                onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-                  sceneControls.updateVisual({
-                    objectFit: event.currentTarget.value as ObjectFitMode
-                  })
-                }
-              >
-                <option value="cover">cover</option>
-                <option value="contain">contain</option>
-                <option value="fill">fill</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="playground-control-card">
-            <p className="eyebrow">Scrollbar</p>
-            <ToggleField
-              label="Show custom scrollbar"
-              checked={scrollbarControls.showScrollbar}
-              onChange={(nextValue) =>
-                sceneControls.updateScrollbar({ enabled: nextValue })
-              }
-            />
-            <RangeField
-              label="Track opacity"
-              value={scrollbarControls.trackOpacity}
-              minimum={0}
-              maximum={0.4}
-              step={0.01}
-              onChange={(nextValue) =>
-                sceneControls.updateScrollbar({ trackOpacity: nextValue })
-              }
-              formatter={formatPercent}
-            />
-            <RangeField
-              label="Thumb opacity"
-              value={scrollbarControls.thumbOpacity}
-              minimum={0.2}
-              maximum={1}
-              step={0.01}
-              onChange={(nextValue) =>
-                sceneControls.updateScrollbar({ thumbOpacity: nextValue })
-              }
-              formatter={formatPercent}
-            />
-
-            <div className="control-swatch-group">
-              <span className="control-field__label">Thumb color</span>
-              <div className="control-swatch-row">
-                {thumbColorOptions.map((color) => (
-                  <button
-                    key={color}
-                    aria-label={`Use ${color} thumb color`}
-                    className={`control-swatch${
-                      scrollbarControls.thumbColor === color
-                        ? ' control-swatch--active'
-                        : ''
-                    }`}
-                    style={{ background: color }}
-                    type="button"
-                    onClick={() =>
-                      sceneControls.updateScrollbar({ thumbColor: color })
-                    }
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="playground-control-card">
-            <p className="eyebrow">Scroll + debug</p>
-            <ToggleField
-              label="Smooth scrub"
-              checked={scrollControls.smooth}
-              onChange={(nextValue) =>
-                sceneControls.updateScroll({ smooth: nextValue })
-              }
-            />
-            <RangeField
-              label="Lerp"
-              value={scrollControls.lerp}
-              minimum={0.04}
-              maximum={0.45}
-              step={0.01}
-              onChange={(nextValue) =>
-                sceneControls.updateScroll({ lerp: nextValue })
-              }
-            />
-            <RangeField
-              label="Duration"
-              value={scrollControls.duration}
-              minimum={0.15}
-              maximum={1.4}
-              step={0.05}
-              onChange={(nextValue) =>
-                sceneControls.updateScroll({ duration: nextValue })
-              }
-            />
-            <ToggleField
-              label="Show debug HUD"
-              checked={debugEnabled}
-              onChange={(nextValue) =>
-                sceneControls.updateDebug({ enabled: nextValue })
-              }
-            />
-            <RangeField
-              label="Scroll span"
-              value={scrollScreens}
-              minimum={2.4}
-              maximum={4.8}
-              step={0.1}
-              onChange={setScrollScreens}
-            />
-          </div>
-
-          <article className="playground-control-card playground-control-card--code">
-            <p className="eyebrow">Current props</p>
-            <h3>Live configuration snapshot</h3>
-            <p>
-              Copy this shape into the package component after tuning the scene.
-              The preview-only scroll span stays separate, while smooth scrub,
-              debug HUD, and scrollbar controls map directly to the shipped
-              runtime config.
-            </p>
-            <CodeBlock code={liveConfig} language="json" />
-            <div className="docs-inline-list">
-              <span className="docs-chip docs-chip--muted">
-                pnpm extract &quot;./video.mp4&quot;
-              </span>
-              <span className="docs-chip docs-chip--muted">
-                useImmersiveConfigControls()
-              </span>
-              <span className="docs-chip docs-chip--muted">
-                Shared WebP frames
-              </span>
-              <span className="docs-chip docs-chip--muted">
-                scroll.smooth / lerp / duration
-              </span>
-            </div>
-          </article>
-        </div>
+      <div className="playground-schema glass-card" data-reveal="card">
+        <header className="playground-schema__header">
+          <p className="eyebrow">Generation</p>
+          <h3 className="section-title">Output configuration</h3>
+        </header>
+        <CodeBlock code={liveConfig} language="json" />
       </div>
     </section>
+  );
+}
+
+function WorkbenchHeader() {
+  const { progress } = useImmersiveProgress();
+  const { currentFrame, manifest } = useImmersiveFrame();
+
+  return (
+    <div
+      className="playground-preview-shell__header"
+      style={{ padding: '1.25rem 2.5rem', alignItems: 'center' }}
+    >
+      <div className="header-content" style={{ flex: 1 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: '1rem',
+            marginBottom: '0.5rem'
+          }}
+        >
+          <p className="eyebrow" style={{ marginBottom: 0 }}>
+            Contained preview
+          </p>
+          <h3
+            className="section-title"
+            style={{ fontSize: '1.1rem', margin: 0 }}
+          >
+            Scrubbing sequence workbench
+          </h3>
+        </div>
+      </div>
+      <div className="info-pill-row" style={{ gap: '0.75rem' }}>
+        <span className="info-pill" style={{ opacity: 0.9 }}>
+          {formatPercent(progress)}
+        </span>
+        <span className="info-pill" style={{ opacity: 0.9 }}>
+          F: {currentFrame + 1}/{manifest?.frameCount ?? 0}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function WorkbenchHUD({ debugEnabled }: { debugEnabled: boolean }) {
+  const { progress } = useImmersiveProgress();
+  const velocity = useImmersiveVelocity();
+  const { manifest } = useImmersiveFrame();
+
+  return (
+    <div className="playground-hud">
+      <div className="playground-instrument">
+        <header className="playground-instrument__header">
+          <strong className="playground-instrument__title">Telemetry</strong>
+          {debugEnabled && <span className="status-dot status-dot--active" />}
+        </header>
+        <main className="playground-instrument__metrics">
+          <div className="playground-instrument__metric">
+            <span>Progress</span>
+            <strong>{formatPercent(progress)}</strong>
+          </div>
+          <div className="playground-instrument__metric">
+            <span>Velocity</span>
+            <strong
+              style={{ color: velocity !== 0 ? 'var(--accent)' : 'inherit' }}
+            >
+              {velocity.toFixed(3)}
+            </strong>
+          </div>
+        </main>
+      </div>
+
+      <div className="playground-instrument" style={{ minWidth: '180px' }}>
+        <header className="playground-instrument__header">
+          <strong className="playground-instrument__title">
+            Asset Metadata
+          </strong>
+        </header>
+        <main className="playground-instrument__metrics">
+          <div className="playground-instrument__metric">
+            <span>Resolution</span>
+            <strong>
+              {manifest ? `${manifest.width}x${manifest.height}` : '...'}
+            </strong>
+          </div>
+          <div className="playground-instrument__metric">
+            <span>Format</span>
+            <strong>{manifest?.format.toUpperCase() ?? '...'}</strong>
+          </div>
+        </main>
+      </div>
+    </div>
   );
 }

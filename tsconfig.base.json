@@ -29,7 +29,10 @@
       "@immersive-scroll/next": ["./packages/next/src/index.ts"],
       "@immersive-scroll/solid": ["./packages/solid/src/index.ts"],
       "@immersive-scroll/web": ["./packages/web/src/index.ts"],
-      "@immersive-scroll/svg-mask": ["./packages/svg-mask/src/index.ts"]
+      "@immersive-scroll/svg-mask": ["./packages/svg-mask/src/index.ts"],
+      "@immersive-scroll/horizontal-scroll": [
+        "./packages/horizontal-scroll/src/index.ts"
+      ]
     }
   }
 }

@@ -28,6 +28,7 @@ export * from './utils/rafThrottle';
 export * from './utils/range';
 export * from './utils/round';
 export * from './utils/safeJsonParse';
+export * from './utils/smoothing';
 export * from './utils/toError';
 export * from './validators/configValidator';
 export * from './validators/manifestValidator';

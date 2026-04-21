@@ -10,6 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@immersive-scroll/horizontal-scroll": "workspace:^",
     "@immersive-scroll/svg-mask": "workspace:^",
     "framer-motion": "^12.38.0",
     "immersive-scroll": "workspace:^",

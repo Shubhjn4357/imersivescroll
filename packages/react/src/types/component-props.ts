@@ -71,6 +71,13 @@ export interface ImmersiveScrollProps {
   scrollbarProps?: ImmersiveScrollbarProps;
   viewportProps?: ImmersiveViewportProps;
   mediaProps?: ImmersiveMediaProps;
+  /**
+   * Where to track scroll progress.
+   * 'window' (default): Tracks page scroll.
+   * 'container': Tracks scroll events on the root container.
+   * 'manual': Engine exists but you must call updateProgress manually.
+   */
+  scrollSource?: 'window' | 'container' | 'manual';
 }
 
 export interface ImmersiveContextValue {

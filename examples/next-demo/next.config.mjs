@@ -16,7 +16,8 @@ const nextConfig = {
     '@immersive-scroll/shared',
     '@immersive-scroll/solid',
     '@immersive-scroll/svg-mask',
-    '@immersive-scroll/web'
+    '@immersive-scroll/web',
+    '@immersive-scroll/horizontal-scroll'
   ],
   webpack(config) {
     config.resolve.alias = {
@@ -40,6 +41,10 @@ const nextConfig = {
       '@immersive-scroll/core$': path.resolve(
         currentDirectory,
         '../../packages/core/src/index.ts'
+      ),
+      '@immersive-scroll/horizontal-scroll$': path.resolve(
+        currentDirectory,
+        '../../packages/horizontal-scroll/src/index.ts'
       ),
       '@immersive-scroll/next$': path.resolve(
         currentDirectory,

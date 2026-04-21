@@ -4,11 +4,13 @@ A pnpm monorepo for immersive scroll storytelling, frame-sequence tooling, and c
 
 ## What ships
 
-- `immersive-scroll`: public package with React exports at the root plus `next`, `solid`, and `web` subpath entry points.
-- `@immersive-scroll/svg-mask`: standalone package for high-performance scroll-driven SVG reveal effects.
-- `immersive-scroll` CLI: bundled frame extraction, validation, repair, manifest, hash, and diagnostics tooling.
-- `examples/next-demo`: the primary docs, demo, and playground surface with the shared mobile-first shell.
-- Internal workspace packages under `packages/` that keep the engine, adapters, shared types, and CLI implementation organized for future expansion.
+- `immersive-scroll`: Public package with React root exports, plus `next`, `solid`, and `web` entry points.
+- `@immersive-scroll/horizontal-scroll`: High-performance horizontal translation for dynamic galleries and product tracks.
+- `@immersive-scroll/svg-mask`: Specialized package for cinematic SVG reveal effects.
+- `immersive-scroll` CLI: Bundled frame extraction, manifest generation, and asset diagnostics.
+- `examples/next-demo`: Shared documentation, interactive demos, and a comprehensive scene playground.
+
+All packages now benefit from our **Natively Smooth Engine**, which uses frame-rate independent interpolation (lerp/spring) for flawless motion parity across devices.
 
 More detail for each package lives in [packages/README.md](packages/README.md).
 

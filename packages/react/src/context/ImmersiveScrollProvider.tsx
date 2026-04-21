@@ -24,6 +24,7 @@ interface ImmersiveScrollProviderProps extends PropsWithChildren {
   containerRef: RefObject<HTMLDivElement | null>;
   viewportRef: RefObject<HTMLDivElement | null>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
+  scrollSource?: 'window' | 'container' | 'manual';
 }
 
 const emptyFrameState: FrameStoreState = {
@@ -100,7 +101,8 @@ export function ImmersiveScrollProvider({
   plugins,
   containerRef,
   viewportRef,
-  canvasRef
+  canvasRef,
+  scrollSource = 'window'
 }: ImmersiveScrollProviderProps) {
   const [frame, setFrame] = useState<FrameStoreState>(emptyFrameState);
   const [scroll, setScroll] = useState<ScrollState>(emptyScrollState);
@@ -164,7 +166,25 @@ export function ImmersiveScrollProvider({
 
     setEngine(nextEngine);
     void nextEngine.init();
+
+    if (scrollSource === 'manual') {
+      return () => {
+        unsubscribeFrame();
+        unsubscribeScroll();
+        void nextEngine.destroy();
+        initializedRef.current = false;
+      };
+    }
+
     const scrollSync = createWindowScrollSync({
+      scrollTarget:
+        scrollSource === 'container'
+          ? (containerRef.current as EventTarget)
+          : window,
+      getScrollY: () =>
+        scrollSource === 'container'
+          ? (containerRef.current?.scrollTop ?? 0)
+          : window.scrollY,
       callbacks: {
         updateProgress(progress) {
           return nextEngine.updateProgress(progress);
@@ -177,6 +197,15 @@ export function ImmersiveScrollProvider({
         }
       },
       resolveProgress(scrollY) {
+        if (scrollSource === 'container' && containerRef.current) {
+          const element = containerRef.current;
+          const maxScroll = Math.max(
+            element.scrollHeight - element.clientHeight,
+            1
+          );
+          return scrollY / maxScroll;
+        }
+
         return resolveProgressFromScrollY(scrollY, containerRef.current);
       },
       getScrollConfig() {
@@ -184,10 +213,19 @@ export function ImmersiveScrollProvider({
       }
     });
 
+    if (scrollSource === 'container' && containerRef.current) {
+      containerRef.current.addEventListener('scroll', scrollSync.syncNow, {
+        passive: true
+      });
+    }
+
     scrollSync.syncNow();
 
     return () => {
       scrollSync.destroy();
+      if (scrollSource === 'container' && containerRef.current) {
+        containerRef.current.removeEventListener('scroll', scrollSync.syncNow);
+      }
       unsubscribeFrame();
       unsubscribeScroll();
       void nextEngine.destroy();

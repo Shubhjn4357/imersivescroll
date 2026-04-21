@@ -10,6 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@immersive-scroll/horizontal-scroll": "workspace:^",
     "immersive-scroll": "workspace:^",
     "solid-js": "^1.9.12"
   },

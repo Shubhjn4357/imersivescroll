@@ -50,6 +50,8 @@ export function createImmersiveEngine(
   const resizeController = createResizeController(options.container ?? null);
   const progressController = createProgressController();
   const loadedFrameIndexes = new Set<number>();
+  let animationFrameId = 0;
+  let lastStepTimestamp = 0;
   let lastRenderRequest = 0;
   let destroyed = false;
 
@@ -65,6 +67,62 @@ export function createImmersiveEngine(
   };
 
   const pluginManager = createPluginManager(options.plugins ?? [], context);
+
+  const syncToProgress = async (progress: number) => {
+    const totalFrames =
+      frameStore.getState().totalFrames ||
+      frameStore.getState().manifest?.frameCount ||
+      1;
+    const frameIndex = calculateFrameIndexFromProgress(progress, totalFrames);
+
+    scrollStore.update({ progress });
+    frameStore.setCurrentFrame(frameIndex);
+
+    const manifest = frameStore.getState().manifest;
+    config.events.onProgress?.(progress);
+    config.events.onFrameChange?.(frameIndex);
+    eventBus.emit('frameChange', { frameIndex, totalFrames });
+    await pluginManager.onFrameChange(frameIndex);
+
+    if (manifest) {
+      void preloadFrameWindow(manifest, frameIndex);
+    }
+
+    await renderCurrentFrame();
+  };
+
+  const step = async (timestamp: number) => {
+    if (destroyed) {
+      return;
+    }
+
+    const deltaTime = lastStepTimestamp ? timestamp - lastStepTimestamp : 16;
+    lastStepTimestamp = timestamp;
+
+    const previousProgress = progressController.getProgress();
+    const nextProgress = progressController.step(deltaTime, config.scroll);
+
+    if (Math.abs(nextProgress - previousProgress) > 0.00001) {
+      await syncToProgress(nextProgress);
+    }
+
+    animationFrameId = window.requestAnimationFrame(step);
+  };
+
+  const startLoop = () => {
+    if (animationFrameId !== 0) {
+      return;
+    }
+    lastStepTimestamp = performance.now();
+    animationFrameId = window.requestAnimationFrame(step);
+  };
+
+  const stopLoop = () => {
+    if (animationFrameId !== 0) {
+      window.cancelAnimationFrame(animationFrameId);
+      animationFrameId = 0;
+    }
+  };
 
   const viewportUnsubscribe = viewportObserver.subscribe((viewport) => {
     context = { ...context, viewport };
@@ -214,6 +272,7 @@ export function createImmersiveEngine(
       const viewport = viewportObserver.getSnapshot();
       renderer?.resize(viewport.width, viewport.height, viewport.pixelRatio);
       await pluginManager.setup();
+      startLoop();
 
       if (options.manifest) {
         await setManifest(options.manifest);
@@ -231,29 +290,13 @@ export function createImmersiveEngine(
       await setManifest(manifest);
       await renderCurrentFrame();
     },
-    async updateProgress(progress: number) {
-      const normalized = progressController.setProgress(progress);
-      scrollStore.update({ progress: normalized });
+    async updateProgress(progress: number, immediate = false) {
+      const normalized = progressController.setProgress(progress, immediate);
 
-      const totalFrames =
-        frameStore.getState().totalFrames ||
-        frameStore.getState().manifest?.frameCount ||
-        1;
-      const frameIndex = calculateFrameIndexFromProgress(
-        normalized,
-        totalFrames
-      );
-
-      frameStore.setCurrentFrame(frameIndex);
-      const manifest = frameStore.getState().manifest;
-      config.events.onProgress?.(normalized);
-      config.events.onFrameChange?.(frameIndex);
-      eventBus.emit('frameChange', { frameIndex, totalFrames });
-      await pluginManager.onFrameChange(frameIndex);
-      if (manifest) {
-        void preloadFrameWindow(manifest, frameIndex);
+      // If immediate or smoothing is disabled, we sync right away
+      if (immediate || !config.scroll.smooth) {
+        await syncToProgress(normalized);
       }
-      await renderCurrentFrame();
     },
     updateScroll(scrollY: number, velocity = 0) {
       const previousState = scrollStore.getState();
@@ -300,6 +343,7 @@ export function createImmersiveEngine(
     async destroy() {
       destroyed = true;
       lastRenderRequest += 1;
+      stopLoop();
       await pluginManager.onDestroy();
       viewportUnsubscribe();
       scrollUnsubscribe();

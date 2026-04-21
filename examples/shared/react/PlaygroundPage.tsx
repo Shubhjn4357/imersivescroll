@@ -9,6 +9,9 @@ import {
 import { CodeBlock } from './CodeBlock';
 import { DocsFrame, type DocsSidebarGroup } from './DocsFrame';
 import { PlaygroundWorkbench } from './PlaygroundWorkbench';
+import { HorizontalScrollDemo } from './HorizontalScrollDemo';
+import { SvgMaskDemo } from './SvgMaskDemo';
+import { useState } from 'react';
 
 const playgroundSidebarGroups: readonly DocsSidebarGroup[] = [
   {
@@ -17,6 +20,13 @@ const playgroundSidebarGroups: readonly DocsSidebarGroup[] = [
       { title: 'Overview', href: '#overview' },
       { title: 'Controls', href: '#controls' },
       { title: 'Implementation modes', href: '#implementation-modes' }
+    ]
+  },
+  {
+    title: 'Modules',
+    links: [
+      { title: 'Horizontal Scroll', href: '#overview' },
+      { title: 'SVG Mask Reveal', href: '#overview' }
     ]
   },
   {
@@ -29,34 +39,100 @@ const playgroundSidebarGroups: readonly DocsSidebarGroup[] = [
 ] as const;
 
 export function PlaygroundPage() {
+  const [activeTab, setActiveTab] = useState<
+    'sequence' | 'horizontal' | 'mask'
+  >('sequence');
+
   return (
     <DocsFrame
       activeHref="/playground"
       badges={[
         'Contained preview',
-        'Hook-driven controls',
-        'Config snapshot',
-        'Copyable code',
-        'Mobile-first shell'
+        'Multi-package QA',
+        'Horizontal translation',
+        'SVG Mask reveal',
+        'Config snapshot'
       ]}
-      description="The playground is the package QA surface. It keeps the scene inside a bounded preview, patches the runtime through the public controls hook, and collapses into a mobile-first layout before expanding into a larger desktop workbench."
+      description="The playground is the package QA surface. Switch between the core engine, horizontal scroll, and SVG mask packages to tune your motion and visual fidelity."
       eyebrow="Playground"
       navigationLinks={nextDemoNavigationLinks}
       sidebarGroups={playgroundSidebarGroups}
       title="Scene playground"
     >
       <section className="docs-section" id="overview">
-        <div className="docs-section__header">
-          <h2>Overview</h2>
-          <p>
-            Use the playground when you want to tune the scene like a package
-            author, not like a page reader. The preview is intentionally
-            contained so visual changes, scrollbar behavior, and live config
-            patches are easier to review without navigating the whole route.
-          </p>
+        <div className="docs-section__header" style={{ marginBottom: '2rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              flexWrap: 'wrap',
+              gap: '1rem'
+            }}
+          >
+            <div>
+              <h2>Overview</h2>
+              <p style={{ maxWidth: '600px' }}>
+                Use the playground to tune your scrollytelling. Switch between
+                modules to test specific motion patterns and configurations.
+              </p>
+            </div>
+
+            <div
+              className="docs-inline-list"
+              style={{
+                padding: '0.25rem',
+                background: 'rgba(255,255,255,0.03)',
+                borderRadius: '0.5rem',
+                border: '1px solid var(--border)'
+              }}
+            >
+              <button
+                className={`docs-chip ${activeTab === 'sequence' ? 'docs-chip--accent' : 'docs-chip--outline'}`}
+                style={{ cursor: 'pointer', border: 'none' }}
+                onClick={() => setActiveTab('sequence')}
+              >
+                Sequence
+              </button>
+              <button
+                className={`docs-chip ${activeTab === 'horizontal' ? 'docs-chip--accent' : 'docs-chip--outline'}`}
+                style={{ cursor: 'pointer', border: 'none' }}
+                onClick={() => setActiveTab('horizontal')}
+              >
+                Horizontal
+              </button>
+              <button
+                className={`docs-chip ${activeTab === 'mask' ? 'docs-chip--accent' : 'docs-chip--outline'}`}
+                style={{ cursor: 'pointer', border: 'none' }}
+                onClick={() => setActiveTab('mask')}
+              >
+                SVG Mask
+              </button>
+            </div>
+          </div>
         </div>
 
-        <PlaygroundWorkbench />
+        {activeTab === 'sequence' && <PlaygroundWorkbench />}
+
+        {activeTab === 'horizontal' && (
+          <div
+            id="horizontal-demo"
+            className="glass-card"
+            style={{ overflow: 'hidden' }}
+          >
+            <HorizontalScrollDemo />
+          </div>
+        )}
+
+        {activeTab === 'mask' && (
+          <div
+            id="mask-demo"
+            className="glass-card"
+            style={{ overflow: 'hidden' }}
+          >
+            <SvgMaskDemo />
+          </div>
+        )}
       </section>
 
       <section className="docs-section" id="library-stack">
