@@ -234,6 +234,7 @@ function buildManifest({
   fps,
   frameCount,
   framePrefix,
+  framesPath,
   licenseUrl,
   outputDimensions,
   quality,
@@ -260,7 +261,7 @@ function buildManifest({
     generatedAt: new Date().toISOString(),
     generator: 'immersive-scroll root extract',
     configFingerprint: `${fps}:${format}:${quality}:${outputDimensions.width}x${outputDimensions.height}:${frameCount}`,
-    framesPath: EXAMPLE_SCENE_PATH,
+    framesPath,
     sourcePageUrl,
     licenseUrl
   };
@@ -270,6 +271,7 @@ export async function extractExampleSceneAssets({
   author = null,
   licenseUrl = null,
   maxFrames = DEFAULT_MAX_FRAMES,
+  outputPath = null,
   quality = null,
   rootDirectory,
   sceneTitle,
@@ -325,59 +327,70 @@ export async function extractExampleSceneAssets({
     rootDirectory,
     resolvedVideoPath
   );
-  const manifest = buildManifest({
-    author,
-    format,
-    fps: targetFps,
-    frameCount: frameFiles.length,
-    framePrefix,
-    licenseUrl,
-    outputDimensions,
-    quality: resolvedQuality,
-    sceneTitle,
-    sourcePageUrl,
-    sourceVideo: `/${localClipPath}`,
-    videoHash: await hashVideoSource(resolvedVideoPath),
-    videoMetadata
-  });
-  const sourceDocument = buildSourceDocument({
-    author,
-    licenseUrl,
-    localClipPath,
-    sceneTitle,
-    sourcePageUrl
-  });
+
+  const writeAssetsToDirectory = async (targetDirectory, framesPath) => {
+    const sceneDirectory = path.join(targetDirectory, EXAMPLE_SCENE_KEY);
+    await ensureDirectory(sceneDirectory);
+
+    const manifest = buildManifest({
+      author,
+      format,
+      fps: targetFps,
+      frameCount: frameFiles.length,
+      framePrefix,
+      framesPath,
+      licenseUrl,
+      outputDimensions,
+      quality: resolvedQuality,
+      sceneTitle,
+      sourcePageUrl,
+      sourceVideo: `/${localClipPath}`,
+      videoHash: await hashVideoSource(resolvedVideoPath),
+      videoMetadata
+    });
+
+    const sourceDocument = buildSourceDocument({
+      author,
+      licenseUrl,
+      localClipPath,
+      sceneTitle,
+      sourcePageUrl
+    });
+
+    for (const frameFileName of frameFiles) {
+      await linkOrCopyFile(
+        path.join(tempFramesDirectory, frameFileName),
+        path.join(sceneDirectory, frameFileName)
+      );
+    }
+
+    await writeFile(
+      path.join(sceneDirectory, 'manifest.json'),
+      JSON.stringify(manifest, null, 2)
+    );
+    await writeFile(
+      path.join(sceneDirectory, 'frames.json'),
+      JSON.stringify({ frames: frameFiles }, null, 2)
+    );
+    await writeFile(path.join(sceneDirectory, 'SOURCE.md'), sourceDocument);
+  };
 
   try {
-    for (const exampleAppName of exampleAppNames) {
-      const immersiveRoot = path.join(
-        rootDirectory,
-        'examples',
-        exampleAppName,
-        'public',
-        'immersive'
-      );
-      const sceneDirectory = path.join(immersiveRoot, EXAMPLE_SCENE_KEY);
-
-      await clearDirectoryContents(immersiveRoot);
-      await ensureDirectory(sceneDirectory);
-
-      for (const frameFileName of frameFiles) {
-        await linkOrCopyFile(
-          path.join(tempFramesDirectory, frameFileName),
-          path.join(sceneDirectory, frameFileName)
+    if (outputPath) {
+      const resolvedOutputPath = path.resolve(rootDirectory, outputPath);
+      await writeAssetsToDirectory(resolvedOutputPath, './');
+    } else {
+      for (const exampleAppName of exampleAppNames) {
+        const immersiveRoot = path.join(
+          rootDirectory,
+          'examples',
+          exampleAppName,
+          'public',
+          'immersive'
         );
+        await clearDirectoryContents(immersiveRoot);
+        await writeAssetsToDirectory(immersiveRoot, EXAMPLE_SCENE_PATH);
       }
-
-      await writeFile(
-        path.join(sceneDirectory, 'manifest.json'),
-        JSON.stringify(manifest, null, 2)
-      );
-      await writeFile(
-        path.join(sceneDirectory, 'frames.json'),
-        JSON.stringify({ frames: frameFiles }, null, 2)
-      );
-      await writeFile(path.join(sceneDirectory, 'SOURCE.md'), sourceDocument);
     }
   } finally {
     await rm(tempFramesDirectory, { recursive: true, force: true });
@@ -390,7 +403,7 @@ export async function extractExampleSceneAssets({
     height: outputDimensions.height,
     maxFrames,
     quality: resolvedQuality,
-    scenePath: EXAMPLE_SCENE_PATH,
+    scenePath: outputPath ?? EXAMPLE_SCENE_PATH,
     sourceVideoPath: localClipPath,
     width: outputDimensions.width,
     videoMetadata

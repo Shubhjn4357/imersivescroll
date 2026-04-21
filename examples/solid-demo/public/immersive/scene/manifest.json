@@ -12,7 +12,7 @@
   "quality": 80,
   "framePattern": "frame-%05d.webp",
   "framePrefix": "frame",
-  "generatedAt": "2026-04-20T16:18:06.514Z",
+  "generatedAt": "2026-04-21T07:33:30.785Z",
   "generator": "immersive-scroll root extract",
   "configFingerprint": "14.663:webp:80:1280x720:249",
   "framesPath": "/immersive/scene",

@@ -8,9 +8,10 @@ import {
 
 const rootDirectory = process.cwd();
 const sourceVideoArgument = process.argv[2];
+const outputPathArgument = process.argv[3];
 
 if (!sourceVideoArgument) {
-  console.error('Usage: pnpm extract "<video-path>"');
+  console.error('Usage: pnpm extract "<video-path>" [output-path]');
   process.exit(1);
 }
 
@@ -22,7 +23,8 @@ try {
   const extractionResult = await extractExampleSceneAssets({
     rootDirectory,
     sceneTitle: resolveSceneTitle(resolvedSourceVideoPath),
-    sourceVideoPath: resolvedSourceVideoPath
+    sourceVideoPath: resolvedSourceVideoPath,
+    outputPath: outputPathArgument
   });
 
   console.log(
